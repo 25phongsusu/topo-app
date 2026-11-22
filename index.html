@@ -110,6 +110,73 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+  
+    /* =========================================================================
+       HOẠT ẢNH DÀNH RIÊNG CHO TRẺ MẦM NON (VẬN ĐỘNG & THỊ GIÁC TRỰC QUAN)
+       ========================================================================= */
+    @keyframes animalBounce {
+      0%, 100% { transform: translateY(0) scale(1); }
+      30% { transform: translateY(-10px) scale(1.08, 0.92); }
+      50% { transform: translateY(-14px) scale(0.95, 1.05); }
+      70% { transform: translateY(0) scale(1.04, 0.96); }
+    }
+    .animate-bounce-pet {
+      animation: animalBounce 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Đuôi ngoe nguẩy nhịp nhàng */
+    @keyframes tailWag {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(16deg); }
+      75% { transform: rotate(-16deg); }
+    }
+    .tail-wag {
+      transform-origin: 105px 125px;
+      animation: tailWag 0.85s ease-in-out infinite;
+    }
+
+    /* Tai rung rinh nhí nhảnh */
+    @keyframes earTwitch {
+      0%, 75%, 100% { transform: rotate(0deg); }
+      80% { transform: rotate(8deg); }
+      90% { transform: rotate(-8deg); }
+    }
+    .ear-twitch {
+      transform-origin: center bottom;
+      animation: earTwitch 2.2s ease-in-out infinite;
+    }
+
+    /* Bong bóng nước bập bồng */
+    @keyframes bubbleFloat {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-7px) scale(1.1); }
+    }
+    .bubble-float {
+      animation: bubbleFloat 1.8s ease-in-out infinite;
+    }
+
+    /* Bong bóng trái tim đập nhịp */
+    @keyframes heartPop {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.18); }
+    }
+    .heart-pop {
+      transform-origin: center center;
+      animation: heartPop 1.4s ease-in-out infinite;
+    }
+
+    /* Sao chúc mừng bay lên khi chạm */
+    @keyframes floatUpFade {
+      0% { transform: translateY(0) scale(0.6); opacity: 1; }
+      100% { transform: translateY(-40px) scale(1.3); opacity: 0; }
+    }
+    .star-sparkle {
+      position: absolute;
+      pointer-events: none;
+      animation: floatUpFade 0.75s ease-out forwards;
+      z-index: 50;
+    }
+
   </style>
 </head>
 <body class="flex items-center justify-center p-0 sm:p-4 md:p-6">
@@ -256,7 +323,7 @@
           </div>
 
           <!-- Hình minh họa nhân vật -->
-          <div id="pr-illustration" onclick="speakPronounceTarget(false)" class="w-32 h-32 sm:w-36 sm:h-36 flex items-center justify-center cursor-pointer">
+          <div id="pr-illustration" onclick="onPronounceIllustrationClick()" class="w-32 h-32 sm:w-36 sm:h-36 flex items-center justify-center cursor-pointer">
             <!-- SVG động vật -->
           </div>
 
@@ -276,13 +343,17 @@
             <span class="text-sky-500 text-[11px]">🔊</span>
           </div>
 
-          <!-- Hai nút nghe mẫu: Bình thường & Đọc chậm -->
-          <div class="flex items-center gap-2.5 mt-3.5 w-full justify-center">
-            <button onclick="speakPronounceTarget(false)" class="btn-3d flex-1 max-w-[145px] bg-gradient-to-b from-sky-400 to-sky-600 text-white font-extrabold py-2.5 px-3 rounded-2xl flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+          <!-- Ba nút tương tác giác quan: Tiếng kêu con vật - Nghe đọc mẫu - Đọc chậm -->
+          <div class="flex flex-wrap items-center gap-2 mt-3.5 w-full justify-center">
+            <button onclick="playCurrentPetAnimalSound()" class="btn-3d py-2 px-3 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-extrabold flex items-center gap-1.5 text-xs shadow-sm">
+              <span>🐾</span>
+              <span id="pr-animal-sound-btn">Tiếng kêu</span>
+            </button>
+            <button onclick="speakPronounceTarget(false)" class="btn-3d flex-1 py-2 px-3 bg-gradient-to-b from-sky-400 to-sky-600 text-white font-extrabold rounded-2xl flex items-center justify-center gap-1 text-xs shadow-sm">
               <span>🔊</span>
               <span>Nghe mẫu</span>
             </button>
-            <button onclick="speakPronounceTarget(true)" class="btn-3d flex-1 max-w-[145px] bg-gradient-to-b from-[#06D6A0] to-emerald-600 text-white font-extrabold py-2.5 px-3 rounded-2xl flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+            <button onclick="speakPronounceTarget(true)" class="btn-3d flex-1 py-2 px-3 bg-gradient-to-b from-[#06D6A0] to-emerald-600 text-white font-extrabold rounded-2xl flex items-center justify-center gap-1 text-xs shadow-sm">
               <span>🐢</span>
               <span>Đọc chậm</span>
             </button>
@@ -353,10 +424,13 @@
             </div>
           </div>
           <div class="flex items-center gap-1">
-            <button onclick="setQuizMode('listen')" id="qmode-listen" class="px-2 py-1 rounded-xl text-[11px] font-extrabold bg-purple-600 text-white shadow-sm">
-              👂 Nghe chọn
+            <button onclick="setQuizMode('sound')" id="qmode-sound" class="px-2 py-1 rounded-xl text-[10px] sm:text-[11px] font-extrabold bg-purple-600 text-white shadow-sm">
+              🐾 Tiếng kêu
             </button>
-            <button onclick="setQuizMode('image')" id="qmode-image" class="px-2 py-1 rounded-xl text-[11px] font-extrabold bg-white text-purple-700 border border-purple-200">
+            <button onclick="setQuizMode('listen')" id="qmode-listen" class="px-2 py-1 rounded-xl text-[10px] sm:text-[11px] font-extrabold bg-white text-purple-700 border border-purple-200">
+              👂 Nghe từ
+            </button>
+            <button onclick="setQuizMode('image')" id="qmode-image" class="px-2 py-1 rounded-xl text-[10px] sm:text-[11px] font-extrabold bg-white text-purple-700 border border-purple-200">
               🖼️ Nhìn hình
             </button>
           </div>
@@ -617,7 +691,7 @@
         id: 'cat',
         word: 'cat',
         ipa: '/kæt/',
-        meaning: 'mèo',
+        meaning: 'mèo', soundLabel: 'Meo meo~', soundIntro: 'Mèo kêu meo meo',
         sentence: 'It is a cute cat.',
         lineColor: '#f97316',
         color: '#f97316',
@@ -626,14 +700,14 @@
         // Minh họa chú mèo cam ngồi dễ thương kèm bong bóng trái tim giống ảnh
         svg: `
           <svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
-            <!-- Bong bóng tim nhỏ bên phải -->
-            <g transform="translate(122, 34)">
+            <!-- Bong bóng tim nhỏ bên phải nhịp đập -->
+            <g class="heart-pop" transform="translate(122, 34)">
               <circle cx="12" cy="12" r="11" fill="#ffffff" stroke="#312e81" stroke-width="2.5"/>
               <path d="M8 14 L4 18 L11 16" fill="#ffffff" stroke="#312e81" stroke-width="2" stroke-linejoin="round"/>
               <path d="M12 16 C12 16 7 12.5 7 9.5 C7 7.8 8.3 6.8 9.8 6.8 C10.8 6.8 11.6 7.4 12 8.2 C12.4 7.4 13.2 6.8 14.2 6.8 C15.7 6.8 17 7.8 17 9.5 C17 12.5 12 16 12 16 Z" fill="#ec4899"/>
             </g>
-            <!-- Đuôi mèo cong -->
-            <path d="M108 122 C132 122, 138 96, 126 86 C120 81, 114 87, 118 93 C124 101, 117 112, 105 112" fill="#fbbf24" stroke="#312e81" stroke-width="3.5" stroke-linecap="round"/>
+            <!-- Đuôi mèo cong vẫy vẫy -->
+            <path class="tail-wag" d="M108 122 C132 122, 138 96, 126 86 C120 81, 114 87, 118 93 C124 101, 117 112, 105 112" fill="#fbbf24" stroke="#312e81" stroke-width="3.5" stroke-linecap="round"/>
             <!-- Thân mèo -->
             <path d="M52 94 C44 114, 44 136, 56 142 L104 142 C116 136, 116 114, 108 94 Z" fill="#fcd34d" stroke="#312e81" stroke-width="3.5" stroke-linejoin="round"/>
             <!-- Bụng trắng -->
@@ -673,7 +747,7 @@
         id: 'dog',
         word: 'dog',
         ipa: '/dɒɡ/',
-        meaning: 'chó',
+        meaning: 'chó', soundLabel: 'Gâu gâu!', soundIntro: 'Cún sủa gâu gâu',
         sentence: 'The dog is very happy.',
         lineColor: '#eab308',
         color: '#eab308',
@@ -682,8 +756,8 @@
         // Minh họa chú chó Shiba vàng đeo vòng cổ xanh + chuông vàng giống ảnh
         svg: `
           <svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
-            <!-- Đuôi cuộn tròn bên phải -->
-            <path d="M104 124 C122 124, 126 105, 112 102 C104 100, 101 110, 108 113" fill="#f59e0b" stroke="#451a03" stroke-width="3.5" stroke-linecap="round"/>
+            <!-- Đuôi cuộn tròn bên phải vẫy mừng -->
+            <path class="tail-wag" d="M104 124 C122 124, 126 105, 112 102 C104 100, 101 110, 108 113" fill="#f59e0b" stroke="#451a03" stroke-width="3.5" stroke-linecap="round"/>
             <!-- Thân chó Shiba -->
             <path d="M55 92 C48 112, 48 136, 58 142 L102 142 C112 136, 112 112, 105 92 Z" fill="#f59e0b" stroke="#451a03" stroke-width="3.5" stroke-linejoin="round"/>
             <path d="M65 96 L95 96 L91 138 L69 138 Z" fill="#fffbeb"/>
@@ -725,7 +799,7 @@
         id: 'rabbit',
         word: 'rabbit',
         ipa: '/ˈræbɪt/',
-        meaning: 'thỏ',
+        meaning: 'thỏ', soundLabel: 'Chíp chíp~', soundIntro: 'Thỏ ăn cà rốt',
         sentence: 'The white rabbit likes carrots.',
         lineColor: '#ec4899',
         color: '#ec4899',
@@ -739,8 +813,8 @@
               <circle cx="11" cy="11" r="10" fill="#ffffff" stroke="#312e81" stroke-width="2.3"/>
               <path d="M11 15 C11 15 6.5 11.8 6.5 9 C6.5 7.5 7.7 6.5 9 6.5 C9.9 6.5 10.6 7 11 7.8 C11.4 7 12.1 6.5 13 6.5 C14.3 6.5 15.5 7.5 15.5 9 C15.5 11.8 11 15 11 15 Z" fill="#ec4899"/>
             </g>
-            <!-- Tai thỏ dài bên trái (nghiêng nhẹ) -->
-            <g transform="rotate(-18 62 56)">
+            <!-- Tai thỏ dài bên trái rung rinh -->
+            <g class="ear-twitch" transform="rotate(-18 62 56)">
               <ellipse cx="56" cy="34" rx="9" ry="26" fill="#ffffff" stroke="#312e81" stroke-width="3.5"/>
               <ellipse cx="56" cy="35" rx="4.5" ry="18" fill="#fbcfe8"/>
             </g>
@@ -785,7 +859,7 @@
         id: 'hamster',
         word: 'hamster',
         ipa: '/ˈhæmstər/',
-        meaning: 'chuột hamster',
+        meaning: 'chuột hamster', soundLabel: 'Chít chít!', soundIntro: 'Hamster chít chít',
         sentence: 'Look at the chubby hamster!',
         lineColor: '#d97706',
         color: '#d97706',
@@ -826,7 +900,7 @@
         id: 'bird',
         word: 'bird',
         ipa: '/bɜːd/',
-        meaning: 'chim',
+        meaning: 'chim', soundLabel: 'Hót líu lo~', soundIntro: 'Chim hót líu lo',
         sentence: 'A blue bird can fly high.',
         lineColor: '#0ea5e9',
         color: '#0ea5e9',
@@ -871,7 +945,7 @@
         id: 'fish',
         word: 'fish',
         ipa: '/fɪʃ/',
-        meaning: 'cá',
+        meaning: 'cá', soundLabel: 'Bong bóng~', soundIntro: 'Cá thở bong bóng',
         sentence: 'The little fish swims in water.',
         lineColor: '#06b6d4',
         color: '#f97316',
@@ -880,11 +954,13 @@
         // Minh họa chú cá vàng cam trắng (cá hề / cá vàng) kèm bong bóng nước xanh giống ảnh
         svg: `
           <svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
-            <!-- Bong bóng nước xanh -->
-            <circle cx="38" cy="54" r="7" fill="#38bdf8" stroke="#0284c7" stroke-width="2"/>
-            <circle cx="35" cy="52" r="2" fill="#ffffff"/>
-            <circle cx="50" cy="40" r="4.5" fill="#7dd3fc" stroke="#0284c7" stroke-width="1.8"/>
-            <circle cx="48" cy="68" r="3.5" fill="#38bdf8"/>
+            <!-- Bong bóng nước xanh nổi bập bồng -->
+            <g class="bubble-float">
+              <circle cx="38" cy="54" r="7" fill="#38bdf8" stroke="#0284c7" stroke-width="2"/>
+              <circle cx="35" cy="52" r="2" fill="#ffffff"/>
+              <circle cx="50" cy="40" r="4.5" fill="#7dd3fc" stroke="#0284c7" stroke-width="1.8"/>
+              <circle cx="48" cy="68" r="3.5" fill="#38bdf8"/>
+            </g>
             <!-- Vây lưng & vây bụng cam -->
             <path d="M68 54 C74 36, 98 38, 104 58" fill="#f97316" stroke="#431407" stroke-width="3.2" stroke-linejoin="round"/>
             <path d="M72 114 C76 128, 92 128, 96 114" fill="#f97316" stroke="#431407" stroke-width="3"/>
@@ -954,8 +1030,8 @@
           window.speechSynthesis.cancel();
           const utterance = new SpeechSynthesisUtterance(text);
           utterance.lang = 'en-US';
-          utterance.rate = isSlow ? 0.65 : 0.92;
-          utterance.pitch = 1.1;
+          utterance.rate = isSlow ? 0.65 : 0.85; // Tốc độ ấm áp, rõ ràng cho tai trẻ
+          utterance.pitch = 1.25; // Cao độ tươi vui, truyền cảm như cô giáo
 
           const voices = window.speechSynthesis.getVoices();
           const preferredVoice = voices.find(v =>
@@ -1028,13 +1104,13 @@
 
         card.innerHTML = `
           ${index === 0 ? `
-            <!-- Bàn tay chỉ vào từ đầu tiên (cat) giống bố cục hình ảnh mẫu -->
-            <div class="absolute -left-3 top-6 z-10 pointer-events-none animate-point text-2xl drop-shadow" title="Bấm vào để nghe!">
+            <!-- Bàn tay chỉ vào từ đầu tiên (cat) -->
+            <div class="absolute -left-3 top-6 z-10 pointer-events-none animate-point text-2xl drop-shadow" title="Chạm vào để nghe!">
               👉
             </div>
           ` : ''}
 
-          <!-- Thanh công cụ nhỏ trên góc thẻ: Nút Sao đã thuộc & Nút Phóng to Flashcard -->
+          <!-- Góc trên: Nút Đánh dấu sao & Nút Luyện phát âm -->
           <div class="w-full flex items-center justify-between mb-1">
             <button onclick="event.stopPropagation(); toggleLearned('${pet.id}')"
               class="w-8 h-8 rounded-full flex items-center justify-center transition-transform active:scale-125 ${isLearned ? 'bg-amber-100 text-amber-500' : 'bg-slate-100 text-slate-300 hover:text-amber-400'}"
@@ -1042,37 +1118,45 @@
               <span class="text-base">${isLearned ? '⭐' : '☆'}</span>
             </button>
 
+            <!-- Huy hiệu phiên âm nhẹ nhàng, không làm rối mắt bé -->
+            <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+              ${pet.ipa}
+            </span>
+
             <button onclick="event.stopPropagation(); openPronounceAt(${index})"
-              class="w-7 h-7 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-[#E84C3D] flex items-center justify-center text-xs font-bold transition"
-              title="Tập phát âm từ này">
+              class="w-8 h-8 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-500 flex items-center justify-center text-xs font-bold transition shadow-sm"
+              title="Luyện phát âm cùng cô">
               🎙️
             </button>
           </div>
 
-          <!-- Từ tiếng Anh (Màu đỏ nổi bật giống ảnh) -->
-          <div class="font-display font-bold text-2xl sm:text-[26px] text-red-600 leading-tight tracking-wide">
-            ${pet.word}
+          <!-- Tên con vật tiếng Việt thân thiện -->
+          <div class="text-xs font-extrabold text-amber-900 bg-amber-100/90 px-2.5 py-0.5 rounded-full inline-block mt-0.5">
+            Con ${pet.meaning}
           </div>
 
-          <!-- Phiên âm IPA -->
-          <div class="text-xs sm:text-sm font-bold text-slate-500 mt-0.5">
-            ${pet.ipa}
-          </div>
-
-          <!-- Nghĩa tiếng Việt -->
-          <div class="text-xs sm:text-sm font-extrabold text-slate-700 mt-0.5 mb-1.5">
-            ${pet.meaning}
-          </div>
-
-          <!-- Hình minh họa SVG -->
-          <div id="svg-wrap-${pet.id}" class="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center my-0.5">
+          <!-- Hình minh họa SVG to đẹp chiếm vị trí trung tâm, nhún nhảy khi chạm -->
+          <div id="svg-wrap-${pet.id}" class="w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center my-1 transition-transform group-hover:scale-105">
             ${pet.svg}
           </div>
 
-          <!-- Nút loa phát âm nhỏ phía dưới -->
-          <div class="mt-1.5 inline-flex items-center gap-1 px-3 py-1 rounded-full ${pet.bgSoft} text-slate-700 text-[11px] font-extrabold">
-            <span>🔊</span>
-            <span>Nghe</span>
+          <!-- Từ tiếng Anh chữ to nổi bật -->
+          <div class="font-display font-bold text-2xl sm:text-3xl text-red-600 leading-none tracking-wide mt-0.5">
+            ${pet.word}
+          </div>
+
+          <!-- HAI NÚT ÂM THANH RIÊNG BIỆT: Tiếng con vật kêu & Giọng cô giáo đọc -->
+          <div class="w-full grid grid-cols-2 gap-1.5 mt-2.5 pt-2 border-t border-slate-100">
+            <button onclick="event.stopPropagation(); bouncePetCard('${pet.id}'); playAnimalSound('${pet.id}')"
+              class="btn-3d py-1.5 px-1 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-800 text-[11px] font-extrabold flex items-center justify-center gap-1">
+              <span>🐾</span>
+              <span class="truncate">${pet.soundLabel}</span>
+            </button>
+            <button onclick="event.stopPropagation(); bouncePetCard('${pet.id}'); speakWord('${pet.word}')"
+              class="btn-3d py-1.5 px-1 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-800 text-[11px] font-extrabold flex items-center justify-center gap-1">
+              <span>🔊</span>
+              <span>Đọc tên</span>
+            </button>
           </div>
         `;
 
@@ -1085,14 +1169,27 @@
       });
     }
 
-    function triggerCardSpeak(pet) {
-      speakWord(pet.word, false);
-      const wrap = document.getElementById(`svg-wrap-${pet.id}`);
+    function bouncePetCard(id) {
+      const wrap = document.getElementById(`svg-wrap-${id}`);
       if (wrap) {
-        wrap.classList.remove('animate-jelly');
-        void wrap.offsetWidth; // trigger reflow
-        wrap.classList.add('animate-jelly');
+        wrap.classList.remove('animate-bounce-pet', 'animate-jelly');
+        void wrap.offsetWidth;
+        wrap.classList.add('animate-bounce-pet');
       }
+      const card = document.getElementById(`card-${id}`);
+      if (card) {
+        const rect = card.getBoundingClientRect();
+        spawnSparkles(rect.left + rect.width / 2, rect.top + 30);
+      }
+    }
+
+    // Khi chạm cả thẻ: Phát tiếng kêu con vật trước -> Rung rinh -> Sau đó giọng cô giáo đọc tên!
+    function triggerCardSpeak(pet) {
+      bouncePetCard(pet.id);
+      playAnimalSound(pet.id);
+      setTimeout(() => {
+        speakWord(pet.word, false);
+      }, 450);
     }
 
     function toggleLearned(id) {
@@ -1181,6 +1278,8 @@
       document.getElementById('pr-ipa').textContent = pet.ipa;
       document.getElementById('pr-meaning').textContent = pet.meaning;
       document.getElementById('pr-sentence').textContent = pet.sentence;
+      const soundBtnLabel = document.getElementById('pr-animal-sound-btn');
+      if (soundBtnLabel) soundBtnLabel.textContent = `Tiếng kêu: ${pet.soundLabel}`;
 
       // Hiển thị số sao đã đạt của từ hiện tại
       const currentStars = pronounceStars[pet.id] || 0;
@@ -1208,6 +1307,25 @@
         ctaTitle.textContent = `🌟 Tuyệt vời (${practicedCount}/6 từ)! Chuyển sang Bài tập 2: Nối từ`;
       } else {
         ctaTitle.textContent = 'Sẵn sàng thử thách tiếp theo chưa bé?';
+      }
+    }
+
+    
+    function onPronounceIllustrationClick() {
+      playCurrentPetAnimalSound();
+      setTimeout(() => speakPronounceTarget(false), 450);
+    }
+
+    function playCurrentPetAnimalSound() {
+      const pet = PETS_DATA[currentPronounceIdx];
+      playAnimalSound(pet.id);
+      const illu = document.getElementById('pr-illustration');
+      if (illu) {
+        illu.classList.remove('animate-bounce-pet');
+        void illu.offsetWidth;
+        illu.classList.add('animate-bounce-pet');
+        const rect = illu.getBoundingClientRect();
+        spawnSparkles(rect.left + rect.width / 2, rect.top + 20);
       }
     }
 
@@ -1345,16 +1463,14 @@
       const isExact = transcripts.some(t => t.includes(target));
       const isClose = transcripts.some(t => validList.some(alias => t.includes(alias)));
 
+      // ĐÁNH GIÁ SƯ PHẠM MẦM NON: Khuyến khích trẻ mở miệng phát âm là thành công!
       if (isExact) {
-        awardPronunciationStars(3, heardPrimary, '🎉 Giỏi quá! Phát âm chuẩn 100%!');
-      } else if (isClose) {
-        awardPronunciationStars(2, heardPrimary, '👏 Rất tốt! Gần chuẩn rồi, thêm 1 lần nữa cho 3 sao nhé!');
+        awardPronunciationStars(3, heardPrimary, '🎉 Xuất sắc! Bé phát âm chuẩn 100% luôn!');
+      } else if (isClose || heardPrimary.length > 0) {
+        // Bé đã rất cố gắng nói, tặng ngay 3 sao và lời khen của cô giáo
+        awardPronunciationStars(3, heardPrimary, '👏 Bé đọc rất to và tự tin! Cô tặng 3 sao nè!');
       } else {
-        playSoundEffect('wrong');
-        document.getElementById('pr-result-box').innerHTML = `
-          <div class="text-xs font-extrabold text-rose-500">🙈 Máy nghe thành: "${heardPrimary}"</div>
-          <div class="text-[11px] font-bold text-slate-500">Bé nghe lại mẫu và đọc rõ từ <b>"${pet.word}"</b> nhé!</div>
-        `;
+        awardPronunciationStars(2, pet.word, '🌟 Bé đọc gần đúng rồi, cùng cô nói lại thật to nhé!');
       }
     }
 
@@ -1377,8 +1493,9 @@
         renderGrid();
       }
 
-      playSoundEffect('correct');
-      if (stars === 3) launchConfetti();
+      playApplause();
+      launchConfetti();
+      setTimeout(() => speakPraise(), 500);
 
       renderPronounceView();
       document.getElementById('pr-result-box').innerHTML = `
@@ -1392,15 +1509,20 @@
     // =========================================================================
     function setQuizMode(mode) {
       quizMode = mode;
+      const btnSound = document.getElementById('qmode-sound');
       const btnListen = document.getElementById('qmode-listen');
       const btnImage = document.getElementById('qmode-image');
 
-      if (mode === 'listen') {
-        btnListen.className = 'px-2.5 py-1 rounded-xl text-xs font-extrabold bg-purple-600 text-white shadow-sm';
-        btnImage.className = 'px-2.5 py-1 rounded-xl text-xs font-extrabold bg-white text-purple-700 border border-purple-200';
-      } else {
-        btnImage.className = 'px-2.5 py-1 rounded-xl text-xs font-extrabold bg-purple-600 text-white shadow-sm';
-        btnListen.className = 'px-2.5 py-1 rounded-xl text-xs font-extrabold bg-white text-purple-700 border border-purple-200';
+      [btnSound, btnListen, btnImage].forEach(b => {
+        if (b) b.className = 'px-2 py-1 rounded-xl text-[10px] sm:text-[11px] font-extrabold bg-white text-purple-700 border border-purple-200';
+      });
+
+      if (mode === 'sound' && btnSound) {
+        btnSound.className = 'px-2 py-1 rounded-xl text-[10px] sm:text-[11px] font-extrabold bg-purple-600 text-white shadow-sm';
+      } else if (mode === 'listen' && btnListen) {
+        btnListen.className = 'px-2 py-1 rounded-xl text-[10px] sm:text-[11px] font-extrabold bg-purple-600 text-white shadow-sm';
+      } else if (mode === 'image' && btnImage) {
+        btnImage.className = 'px-2 py-1 rounded-xl text-[10px] sm:text-[11px] font-extrabold bg-purple-600 text-white shadow-sm';
       }
       generateQuizQuestion();
     }
@@ -1419,15 +1541,24 @@
       const imagePrompt = document.getElementById('quiz-image-prompt');
       const instruction = document.getElementById('quiz-instruction');
 
-      if (quizMode === 'listen') {
-        instruction.textContent = 'Bé hãy nghe và chọn đúng con vật nhé!';
+      if (quizMode === 'sound') {
+        instruction.textContent = '🐾 Lắng nghe tiếng kêu và đoán xem con gì nhé!';
         audioPrompt.classList.remove('hidden');
         audioPrompt.classList.add('flex');
         imagePrompt.classList.add('hidden');
         imagePrompt.classList.remove('flex');
+        document.querySelector('#quiz-audio-prompt span.text-3xl').textContent = '🐾';
+        setTimeout(() => playQuizAudio(), 250);
+      } else if (quizMode === 'listen') {
+        instruction.textContent = '🔊 Nghe phát âm tiếng Anh và chọn đúng con vật!';
+        audioPrompt.classList.remove('hidden');
+        audioPrompt.classList.add('flex');
+        imagePrompt.classList.add('hidden');
+        imagePrompt.classList.remove('flex');
+        document.querySelector('#quiz-audio-prompt span.text-3xl').textContent = '🔊';
         setTimeout(() => playQuizAudio(), 250);
       } else {
-        instruction.textContent = 'Nhìn hình và chọn từ tiếng Anh đúng!';
+        instruction.textContent = '🖼️ Nhìn hình và chọn từ tiếng Anh đúng!';
         imagePrompt.classList.remove('hidden');
         imagePrompt.classList.add('flex');
         audioPrompt.classList.add('hidden');
@@ -1442,11 +1573,11 @@
         const btn = document.createElement('button');
         btn.className = 'btn-3d bg-white hover:bg-purple-50 border-2 border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center transition-all';
 
-        if (quizMode === 'listen') {
-          // Hiển thị hình ảnh & nghĩa nhỏ để bé chọn
+        if (quizMode === 'sound' || quizMode === 'listen') {
+          // Hiển thị hình ảnh con vật to đẹp & nghĩa tiếng Việt cho bé
           btn.innerHTML = `
-            <div class="w-20 h-20 mb-1">${opt.svg}</div>
-            <span class="text-xs font-extrabold text-slate-600">${opt.meaning}</span>
+            <div class="w-20 h-20 mb-1 pointer-events-none">${opt.svg}</div>
+            <span class="text-xs font-extrabold text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded-full">${opt.meaning}</span>
           `;
         } else {
           // Hiển thị từ tiếng Anh & phiên âm để bé chọn
@@ -1462,7 +1593,10 @@
     }
 
     function playQuizAudio() {
-      if (currentQuizTarget) {
+      if (!currentQuizTarget) return;
+      if (quizMode === 'sound') {
+        playAnimalSound(currentQuizTarget.id);
+      } else {
         speakWord(currentQuizTarget.word, false);
       }
     }
@@ -1481,9 +1615,10 @@
 
         feedbackEl.innerHTML = `<span class="text-emerald-600 flex items-center gap-1">🎉 Chính xác! "${currentQuizTarget.word}" (${currentQuizTarget.meaning})</span>`;
 
-        playSoundEffect('correct');
-        speakWord(currentQuizTarget.word, false);
+        playAnimalSound(currentQuizTarget.id);
+        playApplause();
         launchConfetti();
+        setTimeout(() => speakWord(currentQuizTarget.word, false), 400);
 
         // Tự động đánh dấu đã thuộc nếu trả lời đúng
         if (!learnedIds.has(currentQuizTarget.id)) {
@@ -1654,7 +1789,9 @@
           const elapsedSec = Math.max(3, Math.round((Date.now() - matchStartTime) / 1000));
           document.getElementById('match-summary-text').textContent = `Thời gian hoàn thành: ${elapsedSec} giây • Tuyệt vời!`;
           document.getElementById('match-complete-card').classList.remove('hidden');
+          playApplause();
           launchConfetti();
+          setTimeout(() => speakPraise(), 500);
         }
       } else {
         // Nối sai -> Rung nhẹ và đặt lại
@@ -1920,9 +2057,11 @@
         document.getElementById('dialogue-answer-sub').textContent = `Đó là một con ${targetPet.meaning}!`;
         feedbackEl.innerHTML = `<span class="text-emerald-600">🎉 Tuyệt vời! "${fullSentence}" (Đó là một con ${targetPet.meaning})</span>`;
 
-        playSoundEffect('correct');
+        playApplause();
+        playAnimalSound(targetPet.id);
         speakWord(fullSentence, false);
         launchConfetti();
+        setTimeout(() => speakPraise(), 600);
         renderSentenceWorkspace();
 
         if (!learnedIds.has(targetPet.id)) {
