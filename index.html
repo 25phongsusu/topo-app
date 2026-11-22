@@ -5,26 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TOPO - Tiếng Anh Trẻ Em | Động Vật Nuôi</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Fredoka & Nunito cho phong cách tròn trịa, thân thiện với trẻ em -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['"Cherry Bomb One"', 'Fredoka', 'Nunito', 'cursive', 'sans-serif'],
+            cherry: ['"Cherry Bomb One"', 'cursive', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <!-- Google Fonts: Cherry Bomb One (mới cài đặt), Fredoka & Nunito -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
   <!-- Tone.js cho âm thanh vui nhộn khi trả lời đúng/sai -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
   <!-- Canvas Confetti cho hiệu ứng pháo giấy chúc mừng -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
   <style>
+    /* Nạp font Cherry Bomb One cục bộ của dự án và từ font máy tính vừa cài đặt */
+    @font-face {
+      font-family: 'Cherry Bomb One';
+      src: local('Cherry Bomb One'),
+           local('CherryBombOne-Regular'),
+           url('./fonts/CherryBombOne-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
     body {
-      font-family: 'Nunito', sans-serif;
+      font-family: 'Nunito', 'Cherry Bomb One', sans-serif;
       background: linear-gradient(135deg, #fff5eb 0%, #e0f2fe 50%, #fef3c7 100%);
       min-height: 100vh;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
 
-    .font-display {
-      font-family: 'Fredoka', 'Nunito', sans-serif;
+    .font-display,
+    .font-cherry {
+      font-family: 'Cherry Bomb One', 'Fredoka', 'Nunito', cursive, sans-serif;
+      letter-spacing: 0.03em;
     }
 
     /* Hiệu ứng nút bấm 3D nổi bật */
@@ -1130,8 +1155,8 @@
             </button>
           </div>
 
-          <!-- Tên con vật tiếng Việt thân thiện -->
-          <div class="text-xs font-extrabold text-amber-900 bg-amber-100/90 px-2.5 py-0.5 rounded-full inline-block mt-0.5">
+          <!-- Tên con vật tiếng Việt thân thiện phong cách Cherry Bomb One -->
+          <div class="font-display text-sm text-amber-900 bg-amber-100/90 px-3 py-0.5 rounded-full inline-block mt-0.5 shadow-sm">
             Con ${pet.meaning}
           </div>
 
@@ -1140,20 +1165,20 @@
             ${pet.svg}
           </div>
 
-          <!-- Từ tiếng Anh chữ to nổi bật -->
-          <div class="font-display font-bold text-2xl sm:text-3xl text-red-600 leading-none tracking-wide mt-0.5">
+          <!-- Từ tiếng Anh chữ to nổi bật phong cách Cherry Bomb One -->
+          <div class="font-display font-bold text-3xl sm:text-4xl text-red-600 leading-none tracking-wide mt-0.5 drop-shadow-sm">
             ${pet.word}
           </div>
 
           <!-- HAI NÚT ÂM THANH RIÊNG BIỆT: Tiếng con vật kêu & Giọng cô giáo đọc -->
           <div class="w-full grid grid-cols-2 gap-1.5 mt-2.5 pt-2 border-t border-slate-100">
             <button onclick="event.stopPropagation(); bouncePetCard('${pet.id}'); playAnimalSound('${pet.id}')"
-              class="btn-3d py-1.5 px-1 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-800 text-[11px] font-extrabold flex items-center justify-center gap-1">
+              class="btn-3d py-1.5 px-1 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-800 font-display text-xs flex items-center justify-center gap-1">
               <span>🐾</span>
               <span class="truncate">${pet.soundLabel}</span>
             </button>
             <button onclick="event.stopPropagation(); bouncePetCard('${pet.id}'); speakWord('${pet.word}')"
-              class="btn-3d py-1.5 px-1 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-800 text-[11px] font-extrabold flex items-center justify-center gap-1">
+              class="btn-3d py-1.5 px-1 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-800 font-display text-xs flex items-center justify-center gap-1">
               <span>🔊</span>
               <span>Đọc tên</span>
             </button>
