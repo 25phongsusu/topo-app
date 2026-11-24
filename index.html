@@ -699,7 +699,7 @@
         </div>
 
         <div class="bg-white rounded-3xl border-4 border-[#FACC15] shadow-[0_8px_0_#CA8A04] p-6 text-center space-y-5">
-          <div id="feed-pet-speech" class="inline-block bg-[#FFEDD5] border-2 border-[#FDBA74] px-6 py-2.5 rounded-2xl font-display text-[22px] font-bold text-[#9A3412]">
+          <div id="feed-pet-speech" onclick="speakCurrentMealFood()" title="Chạm để nghe đọc tên món ăn" class="btn-lego inline-block bg-[#FFEDD5] hover:bg-[#FED7AA] border-2 border-[#FDBA74] shadow-[0_4px_0_#FB923C] px-6 py-2.5 rounded-2xl font-display text-[20px] sm:text-[22px] font-bold text-[#9A3412] cursor-pointer">
             Meow! Tớ đói bụng quá, cho tớ ăn nhé!
           </div>
           <div id="feed-pet-svg" class="w-44 h-44 mx-auto transition-transform"></div>
@@ -2108,6 +2108,10 @@
       { petId: 'fish', foodId: 'cake', foodName: 'Bánh (cake)', foodSvg: FOOD_SVGS.cake }
     ];
     let feedScore = 0, currentMeal = null;
+    function speakCurrentMealFood() {
+      if (currentMeal) speakWord(currentMeal.foodId, false);
+    }
+
     function initFeedGame() {
       currentMeal = PET_MEALS[Math.floor(Math.random() * PET_MEALS.length)];
       const petObj = TOPICS_DATA[0].items.find(p => p.id === currentMeal.petId);
@@ -2124,17 +2128,24 @@
         btn.className = 'btn-lego min-h-[100px] bg-[#FFFBEB] hover:bg-[#FEF08A] border-2 border-[#FACC15] shadow-[0_5px_0_#CA8A04] rounded-2xl p-3 flex flex-col items-center justify-center';
         btn.innerHTML = `<div class="w-16 h-16 pointer-events-none">${ch.foodSvg}</div><span class="font-display text-base font-bold text-[#854D0E] mt-1">${ch.foodName}</span>`;
         btn.onclick = () => {
+          // Khi click vào món ăn thì phát âm tiếng Anh luôn từ đó
+          speakWord(ch.foodId, false);
+
           if (ch.foodId === currentMeal.foodId) {
             feedScore++;
             document.getElementById('feed-score').textContent = `Đã cho ăn: ${feedScore} bạn nhỏ`;
-            document.getElementById('feed-feedback').innerHTML = `<span class="text-[#15803D]">Ngon quá! Cảm ơn bé nhé! ❤️</span>`;
+            document.getElementById('feed-feedback').innerHTML = `<span class="text-[#15803D]">Chính xác! "${ch.foodId.toUpperCase()}" - Ngon quá! ❤️</span>`;
             const pSvg = document.getElementById('feed-pet-svg');
             pSvg.classList.remove('animate-pop-bounce'); void pSvg.offsetWidth; pSvg.classList.add('animate-pop-bounce');
-            playSoundEffect('chomp'); playApplause(); launchConfetti(); addPetTreats(1, 'Cho thú ăn ngon'); speakWord('Yummy! Thank you!');
-            setTimeout(initFeedGame, 1600);
+            playSoundEffect('chomp');
+            playApplause();
+            launchConfetti();
+            addPetTreats(1, 'Cho thú ăn ngon');
+            setTimeout(() => speakWord('Yummy! Thank you!'), 850);
+            setTimeout(initFeedGame, 2100);
           } else {
             playSoundEffect('wrong');
-            document.getElementById('feed-feedback').innerHTML = `<span class="text-[#BE123C]">Ôi không phải món này rồi, thử lại nhé!</span>`;
+            document.getElementById('feed-feedback').innerHTML = `<span class="text-[#BE123C]">Đây là "${ch.foodName}", bé chọn lại nhé!</span>`;
           }
         };
         container.appendChild(btn);
