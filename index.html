@@ -234,11 +234,11 @@
       gap: 0.65rem !important;
     }
 
-    #app-shell[data-mode="mobile"] .card-pet {
+    #app-shell[data-mode="mobile"] .pet-card {
       padding: 0.65rem !important;
       border-radius: 1.25rem !important;
     }
-    #app-shell[data-mode="mobile"] .card-pet div[id^="svg-wrap-"] {
+    #app-shell[data-mode="mobile"] .pet-card div[id^="svg-wrap-"] {
       width: 6.5rem !important;
       height: 6.5rem !important;
     }
@@ -527,6 +527,11 @@
             </div>
           </div>
         </div>
+        <div class="pt-1">
+          <button onclick="playPopSound(); switchTab('quiz')" class="btn-lego min-h-[60px] w-full bg-[#A855F7] hover:bg-[#9333EA] border-2 border-[#7E22CE] shadow-[0_6px_0_#581C87] text-white font-display font-bold py-3.5 px-6 rounded-3xl flex items-center justify-center gap-3 text-[20px]">
+            <span>Tiếp tục: Đố Vui</span><span>&rarr;</span>
+          </button>
+        </div>
       </section>
 
       <!-- ==================== 3. ĐỐ VUI ==================== -->
@@ -545,8 +550,14 @@
         <div id="quiz-prompt-box" class="bg-white rounded-3xl border-4 border-[#BAE6FD] shadow-[0_6px_0_#7DD3FC] p-6 text-center">
           <p id="quiz-instruction" class="font-display text-[22px] sm:text-[26px] font-bold text-[#1E1B4B] mb-4"></p>
           <div id="quiz-audio-prompt" class="flex flex-col items-center py-2">
-            <button onclick="playQuizAudio()" class="btn-lego w-24 h-24 rounded-3xl bg-[#FACC15] border-2 border-[#EAB308] shadow-[0_8px_0_#CA8A04] text-[#451A03] flex items-center justify-center text-4xl">🔊</button>
-            <span class="text-[18px] font-bold text-[#0369A1] mt-3">Chạm để nghe lại</span>
+            <div class="flex items-center justify-center gap-4">
+              <button onclick="playQuizAudio(false)" class="btn-lego w-24 h-24 rounded-3xl bg-[#FACC15] border-2 border-[#EAB308] shadow-[0_8px_0_#CA8A04] text-[#451A03] flex items-center justify-center text-4xl">🔊</button>
+              <button onclick="playQuizAudio(true)" class="btn-lego min-h-[64px] px-4 py-2 rounded-2xl bg-[#E0F2FE] border-2 border-[#7DD3FC] shadow-[0_5px_0_#0284C7] text-[#0369A1] font-display text-[17px] font-bold flex flex-col items-center justify-center gap-0.5">
+                <span class="text-2xl">🐢</span>
+                <span>Nghe chậm</span>
+              </button>
+            </div>
+            <span class="text-[18px] font-bold text-[#0369A1] mt-3">Chạm để nghe lại hoặc nghe chậm nhé</span>
           </div>
           <div id="quiz-image-prompt" class="hidden flex-col items-center">
             <div id="quiz-target-svg" class="w-36 h-36 mx-auto"></div>
@@ -556,6 +567,11 @@
 
         <div id="quiz-feedback" class="min-h-[30px] flex items-center justify-center text-[20px] font-display font-bold"></div>
         <div id="quiz-options" class="grid grid-cols-2 gap-4 sm:gap-5"></div>
+        <div class="pt-2">
+          <button onclick="playPopSound(); switchTab('match')" class="btn-lego min-h-[60px] w-full bg-[#22C55E] hover:bg-[#16A34A] border-2 border-[#16A34A] shadow-[0_6px_0_#15803D] text-white font-display font-bold py-3.5 px-6 rounded-3xl flex items-center justify-center gap-3 text-[20px]">
+            <span>Tiếp tục: Nối Từ</span><span>&rarr;</span>
+          </button>
+        </div>
       </section>
 
       <!-- ==================== 4. NỐI TỪ ==================== -->
@@ -582,6 +598,11 @@
         <div id="match-complete-card" class="hidden bg-[#DCFCE7] border-4 border-[#22C55E] rounded-3xl p-6 text-center shadow-[0_8px_0_#15803D]">
           <h3 class="font-display font-bold text-[26px] text-[#14532D]">Hoan hô! Bé nối đúng hết 6 cặp rồi!</h3>
           <p id="match-summary-text" class="text-[18px] text-[#166534] mt-1 font-bold"></p>
+        </div>
+        <div class="pt-2">
+          <button onclick="playPopSound(); goNextAfterMatch()" class="btn-lego min-h-[60px] w-full bg-[#FF6B35] hover:bg-[#EA580C] border-2 border-[#EA580C] shadow-[0_6px_0_#C2410C] text-white font-display font-bold py-3.5 px-6 rounded-3xl flex items-center justify-center gap-3 text-[20px]">
+            <span id="btn-next-after-match-text">Tiếp tục: Ghép Câu</span><span>&rarr;</span>
+          </button>
         </div>
       </section>
 
@@ -625,6 +646,11 @@
             <button id="btn-check-sentence" onclick="checkBuiltSentence()" class="btn-lego min-h-[64px] flex-1 bg-[#22C55E] border-2 border-[#16A34A] shadow-[0_6px_0_#15803D] text-white font-display font-bold py-3.5 px-6 rounded-2xl text-[20px]">Kiểm tra câu</button>
             <button id="btn-next-sentence" onclick="playPopSound(); nextSentenceChallenge()" class="hidden btn-lego min-h-[64px] flex-1 bg-[#FF6B35] border-2 border-[#EA580C] shadow-[0_6px_0_#C2410C] text-white font-display font-bold py-3.5 px-6 rounded-2xl text-[20px]">Câu tiếp theo &rarr;</button>
           </div>
+        </div>
+        <div class="pt-2">
+          <button onclick="playPopSound(); switchArea('games')" class="btn-lego min-h-[60px] w-full bg-[#0EA5E9] hover:bg-[#0284C7] border-2 border-[#0284C7] shadow-[0_6px_0_#0369A1] text-white font-display font-bold py-3.5 px-6 rounded-3xl flex items-center justify-center gap-3 text-[20px]">
+            <span>Chơi Trò Chơi Thư Giãn 🎮</span><span>&rarr;</span>
+          </button>
         </div>
       </section>
 
@@ -726,8 +752,13 @@
             <h2 class="font-display text-[26px] sm:text-[30px] font-bold text-[#14532D]">🏡 Ngôi Nhà Thú Cưng Của Bé</h2>
             <p class="text-[18px] font-bold text-[#166534]">Học thuộc từ vựng để mở khóa các bạn thú cưng về nhà chơi nhé!</p>
           </div>
-          <div id="pethouse-badge-count" class="bg-white border-2 border-[#22C55E] px-5 py-2 rounded-2xl font-display text-[22px] font-bold text-[#15803D]">
-            1/6 Bạn nhỏ
+          <div class="flex flex-wrap items-center gap-3">
+            <div id="pethouse-treats-count" class="bg-[#FEF08A] border-2 border-[#FACC15] shadow-[0_4px_0_#CA8A04] px-4 py-2 rounded-2xl font-display text-[20px] font-bold text-[#854D0E]">
+              🍪 3 Bánh thưởng
+            </div>
+            <div id="pethouse-badge-count" class="bg-white border-2 border-[#22C55E] px-5 py-2 rounded-2xl font-display text-[20px] font-bold text-[#15803D]">
+              1/6 Bạn nhỏ
+            </div>
           </div>
         </div>
 
@@ -1393,6 +1424,28 @@
         bEle.className = 'btn-lego min-h-[44px] px-3 py-1.5 rounded-xl font-display text-sm sm:text-base font-bold bg-[#A855F7] text-white border-2 border-[#9333EA] shadow-[0_4px_0_#6B21A8]';
         bPre.className = 'btn-lego min-h-[44px] px-3 py-1.5 rounded-xl font-display text-sm sm:text-base font-bold bg-[#F0FDF4] text-[#15803D] border-2 border-[#86EFAC] shadow-[0_4px_0_#4ADE80]';
       }
+      const tabSentence = document.getElementById('tab-sentence');
+      const tabSpelling = document.getElementById('tab-spelling');
+      const subnavLearn = document.getElementById('subnav-learn');
+      const subnavGames = document.getElementById('subnav-games');
+      const nextAfterMatchTxt = document.getElementById('btn-next-after-match-text');
+
+      if (age === 'preschool') {
+        if (tabSentence) tabSentence.classList.add('hidden');
+        if (tabSpelling) tabSpelling.classList.add('hidden');
+        if (subnavLearn) { subnavLearn.classList.remove('grid-cols-5'); subnavLearn.classList.add('grid-cols-4'); }
+        if (subnavGames) { subnavGames.classList.remove('grid-cols-4'); subnavGames.classList.add('grid-cols-3'); }
+        if (nextAfterMatchTxt) nextAfterMatchTxt.textContent = 'Chơi Trò Chơi Thư Giãn 🎮';
+        if (currentTab === 'sentence') switchTab('grid');
+        if (currentTab === 'spelling') switchTab('memory');
+      } else {
+        if (tabSentence) tabSentence.classList.remove('hidden');
+        if (tabSpelling) tabSpelling.classList.remove('hidden');
+        if (subnavLearn) { subnavLearn.classList.remove('grid-cols-4'); subnavLearn.classList.add('grid-cols-5'); }
+        if (subnavGames) { subnavGames.classList.remove('grid-cols-3'); subnavGames.classList.add('grid-cols-4'); }
+        if (nextAfterMatchTxt) nextAfterMatchTxt.textContent = 'Tiếp tục: Ghép Câu';
+      }
+
       renderGrid();
       if (currentTab === 'pronounce') renderPronounceView();
       if (currentTab === 'memory') initMemoryGame();
@@ -1464,6 +1517,11 @@
       }
     }
 
+    function goNextAfterMatch() {
+      if (currentAgeMode === 'preschool') switchArea('games');
+      else switchTab('sentence');
+    }
+
     function switchTab(tab) {
       stopRecognitionIfRunning();
       currentTab = tab;
@@ -1533,7 +1591,7 @@
           <div class="w-full pt-3 border-t-2 border-[#F0F9FF]">
             <button onclick="event.stopPropagation(); bouncePetCard('${item.id}'); speakWord('${item.word}')"
               class="btn-lego w-full min-h-[60px] py-2 px-4 rounded-2xl bg-[#0EA5E9] border-2 border-[#0284C7] shadow-[0_5px_0_#0369A1] text-white font-display text-[18px] font-bold flex items-center justify-center gap-2">
-              <span class="text-xl">🗣️</span><span>Đọc tên (${item.word})</span>
+              <span class="text-xl">🗣️</span><span>Nghe đọc</span>
             </button>
           </div>
         `;
@@ -1570,15 +1628,27 @@
     }
 
     let playAllTimer = null;
+    function clearCardHighlights() {
+      document.querySelectorAll('.pet-card').forEach(c => {
+        c.classList.remove('ring-4', 'ring-[#FACC15]', 'bg-[#FEF9C3]', 'scale-[1.03]');
+      });
+    }
     function playAllSequence() {
       if (playAllTimer) clearTimeout(playAllTimer);
+      clearCardHighlights();
       const items = getActiveItems();
       let i = 0;
       function step() {
+        clearCardHighlights();
         if (i >= items.length || currentTab !== 'grid') return;
+        const cardEl = document.getElementById(`card-${items[i].id}`);
+        if (cardEl) {
+          cardEl.classList.add('ring-4', 'ring-[#FACC15]', 'bg-[#FEF9C3]', 'scale-[1.03]');
+          cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
         triggerCardSpeak(items[i]);
         i++;
-        playAllTimer = setTimeout(step, 1400);
+        playAllTimer = setTimeout(step, 1500);
       }
       step();
     }
@@ -1755,9 +1825,9 @@
         container.appendChild(btn);
       });
     }
-    function playQuizAudio() {
+    function playQuizAudio(isSlow = false) {
       if (!currentQuizTarget) return;
-      speakWord(currentQuizTarget.word, false);
+      speakWord(currentQuizTarget.word, isSlow);
     }
     function handleQuizAnswer(sel, btn) {
       if (isQuizLocked) return;
@@ -1767,7 +1837,7 @@
         document.getElementById('quiz-score').textContent = `${quizScore} điểm`;
         btn.classList.add('border-[#22C55E]', 'bg-[#DCFCE7]');
         fb.innerHTML = `<span class="text-[#15803D]">Chính xác! "${currentQuizTarget.word}" (${currentQuizTarget.meaning})</span>`;
-        playApplause(); launchConfetti(); setTimeout(() => speakWord(currentQuizTarget.word), 400);
+        playApplause(); launchConfetti(); addPetTreats(1, 'Trả lời đúng Đố vui'); setTimeout(() => speakWord(currentQuizTarget.word), 400);
         if (!learnedIds.has(currentQuizTarget.id)) { learnedIds.add(currentQuizTarget.id); updateProgressUI(); renderGrid(); }
         setTimeout(generateQuizQuestion, 1600);
       } else {
@@ -1830,7 +1900,7 @@
           renderMatchBoard();
           if (matchedPairs.length === getActiveItems().length) {
             document.getElementById('match-complete-card').classList.remove('hidden');
-            playApplause(); launchConfetti(); speakPraise();
+            playApplause(); launchConfetti(); addPetTreats(2, 'Hoàn thành Nối từ'); speakPraise();
           }
         } else {
           playSoundEffect('wrong');
@@ -1913,7 +1983,7 @@
         const full = item.aTemplate.join(' ');
         document.getElementById('dialogue-answer-bubble').textContent = full;
         fb.innerHTML = `<span class="text-[#15803D]">Tuyệt vời! "${full}"</span>`;
-        playApplause(); speakWord(full); launchConfetti();
+        playApplause(); speakWord(full); launchConfetti(); addPetTreats(1, 'Ghép câu đúng');
         document.getElementById('btn-check-sentence').classList.add('hidden');
         document.getElementById('btn-next-sentence').classList.remove('hidden');
       } else {
@@ -1976,7 +2046,7 @@
           playSoundEffect('correct');
           renderMemoryGrid();
           if (memMatchedCount === memCards.length / 2) {
-            playApplause(); launchConfetti(); speakPraise();
+            playApplause(); launchConfetti(); addPetTreats(2, 'Hoàn thành Nối từ'); speakPraise();
           }
         } else {
           setTimeout(() => {
@@ -2010,6 +2080,7 @@
           if (it.id === bubbleTarget.id) {
             playPopSound(); playSoundEffect('correct');
             bubbleScore += 10;
+            if (bubbleScore % 30 === 0) addPetTreats(1, 'Đập 3 bong bóng đúng');
             spawnKidParticles(e.clientX, e.clientY);
             launchConfetti();
             initBubbleGame();
@@ -2059,7 +2130,7 @@
             document.getElementById('feed-feedback').innerHTML = `<span class="text-[#15803D]">Ngon quá! Cảm ơn bé nhé! ❤️</span>`;
             const pSvg = document.getElementById('feed-pet-svg');
             pSvg.classList.remove('animate-pop-bounce'); void pSvg.offsetWidth; pSvg.classList.add('animate-pop-bounce');
-            playSoundEffect('chomp'); playApplause(); launchConfetti(); speakWord('Yummy! Thank you!');
+            playSoundEffect('chomp'); playApplause(); launchConfetti(); addPetTreats(1, 'Cho thú ăn ngon'); speakWord('Yummy! Thank you!');
             setTimeout(initFeedGame, 1600);
           } else {
             playSoundEffect('wrong');
@@ -2119,7 +2190,7 @@
               spellSolved = true; renderSpellingWorkspace();
               document.getElementById('spelling-feedback').innerHTML = `<span class="text-[#15803D]">Chính xác! "${item.word.toUpperCase()}"</span>`;
               document.getElementById('btn-next-spelling').classList.remove('hidden');
-              playApplause(); launchConfetti(); speakWord(item.word);
+              playApplause(); launchConfetti(); addPetTreats(1, 'Đánh vần chính xác'); speakWord(item.word);
             } else {
               playSoundEffect('wrong');
               document.getElementById('spelling-feedback').innerHTML = `<span class="text-[#BE123C]">Chưa đúng rồi, bé xếp lại nhé!</span>`;
@@ -2136,22 +2207,45 @@
     // =========================================================================
     // 13. NHÀ THÚ CƯNG & HUY HIỆU (MY PET HOUSE)
     // =========================================================================
+    function feedPetInHouse(petId, e) {
+      e.stopPropagation();
+      if (petTreats <= 0) {
+        playSoundEffect('wrong');
+        showToast('Hết bánh rồi! Bé hãy học bài hoặc chơi trò chơi để kiếm thêm 🍪 nhé!');
+        return;
+      }
+      petTreats--;
+      localStorage.setItem('topo_pet_treats', petTreats);
+      petLoveMap[petId] = (petLoveMap[petId] || 0) + 1;
+      localStorage.setItem('topo_pet_love', JSON.stringify(petLoveMap));
+      playSoundEffect('chomp');
+      spawnKidParticles(e.clientX, e.clientY);
+      setTimeout(() => speakWord('Yummy! Thank you!'), 350);
+      renderPetHouse();
+    }
+
     function renderPetHouse() {
       const pets = TOPICS_DATA[0].items;
       const unlockedCount = pets.filter(p => learnedIds.has(p.id)).length;
       document.getElementById('pethouse-badge-count').textContent = `${unlockedCount}/${pets.length} Bạn nhỏ`;
+      const tEl = document.getElementById('pethouse-treats-count');
+      if (tEl) tEl.textContent = `🍪 ${petTreats} Bánh thưởng`;
 
       const garden = document.getElementById('pethouse-garden');
       garden.innerHTML = '';
       pets.forEach(p => {
         const unlocked = learnedIds.has(p.id);
+        const love = petLoveMap[p.id] || 0;
         const card = document.createElement('div');
         card.className = unlocked
           ? 'btn-lego bg-white border-4 border-[#22C55E] shadow-[0_6px_0_#16A34A] rounded-3xl p-4 flex flex-col items-center text-center cursor-pointer'
           : 'bg-[#F1F5F9] border-2 border-dashed border-[#94A3B8] rounded-3xl p-4 flex flex-col items-center text-center opacity-70';
         card.innerHTML = unlocked
-          ? `<div class="w-28 h-28">${p.svg}</div><span class="font-display text-xl font-bold text-[#14532D] mt-2">${p.meaning} (${p.word})</span><span class="text-sm font-bold text-[#0284C7]">Chạm để chơi cùng!</span>`
-          : `<div class="w-28 h-28 grayscale opacity-30">${p.svg}</div><span class="font-display text-lg font-bold text-[#64748B] mt-2">Chưa mở khóa</span><span class="text-sm font-bold text-[#64748B]">Học từ "${p.word}" nhé!</span>`;
+          ? `<div class="w-full flex justify-between items-center mb-1"><span class="bg-[#FFE4E6] text-[#BE123C] text-xs font-extrabold px-2.5 py-0.5 rounded-xl">❤️ Cấp ${love}</span></div>
+             <div class="w-24 h-24 sm:w-28 sm:h-28">${p.svg}</div>
+             <span class="font-display text-xl font-bold text-[#14532D] mt-1">${p.meaning} (${p.word})</span>
+             <button onclick="feedPetInHouse('${p.id}', event)" class="btn-lego mt-2 w-full min-h-[44px] py-1.5 px-3 rounded-xl ${petTreats > 0 ? 'bg-[#FACC15] border-2 border-[#EAB308] shadow-[0_4px_0_#CA8A04] text-[#451A03]' : 'bg-[#E2E8F0] text-[#64748B]'} font-display text-sm font-bold">🍪 Cho ăn (+❤️)</button>`
+          : `<div class="w-24 h-24 sm:w-28 sm:h-28 grayscale opacity-30">${p.svg}</div><span class="font-display text-lg font-bold text-[#64748B] mt-2">Chưa mở khóa</span><span class="text-sm font-bold text-[#64748B]">Học từ "${p.word}" nhé!</span>`;
         if (unlocked) {
           card.onclick = (e) => {
             playAnimalSound(p.id);
