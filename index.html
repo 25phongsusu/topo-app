@@ -503,9 +503,9 @@
             <h2 class="font-display text-[24px] font-bold text-[#831843]">Chạm Bong Bóng Bay</h2>
             <p id="bubble-score" class="text-[18px] font-bold text-[#9D174D]">Điểm bong bóng: 0</p>
           </div>
-          <button onclick="playPopSound(); speakBubbleTarget()" class="btn-lego min-h-[56px] px-5 py-2 rounded-2xl bg-[#EC4899] border-2 border-[#DB2777] shadow-[0_5px_0_#9D174D] text-white font-display text-[18px] font-bold flex items-center gap-2">
-            <span>🔊</span><span id="bubble-target-label">Tìm: cat</span>
-          </button>
+          <div class="min-h-[56px] px-5 py-2.5 rounded-2xl bg-[#EC4899] border-2 border-[#DB2777] shadow-[0_5px_0_#9D174D] text-white font-display text-[18px] sm:text-[20px] font-bold flex items-center gap-2">
+            <span class="text-xl">🎯</span><span id="bubble-target-label">Tìm: con mèo</span>
+          </div>
         </div>
 
         <div id="bubble-arena" class="relative bg-gradient-to-b from-[#E0F2FE] to-[#F0FDF4] border-4 border-[#38BDF8] rounded-3xl p-5 min-h-[420px] shadow-[0_8px_0_#0284C7] flex flex-wrap items-center justify-center gap-5 sm:gap-8 overflow-hidden">
@@ -1886,7 +1886,8 @@
     function initBubbleGame() {
       const items = [...getActiveItems()].sort(() => Math.random() - 0.5);
       bubbleTarget = items[0];
-      document.getElementById('bubble-target-label').textContent = `Tìm: ${bubbleTarget.word}`;
+      // Ưu tiên hiển thị Tiếng Việt rõ ràng kèm từ tiếng Anh
+      document.getElementById('bubble-target-label').textContent = `Tìm: ${bubbleTarget.meaning} (${bubbleTarget.word})`;
       document.getElementById('bubble-score').textContent = `Điểm bong bóng: ${bubbleScore}`;
       const arena = document.getElementById('bubble-arena');
       arena.innerHTML = '';
@@ -1911,9 +1912,9 @@
         };
         arena.appendChild(b);
       });
-      setTimeout(speakBubbleTarget, 250);
+      // Không phát âm thanh tìm kiếm theo yêu cầu
     }
-    function speakBubbleTarget() { if (bubbleTarget) speakWord(`Touch the ${bubbleTarget.word}!`); }
+    function speakBubbleTarget() {}
 
     // =========================================================================
     // 11. TRÒ CHƠI 3: CHO THÚ CƯNG ĂN (FEED THE PET)
