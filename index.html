@@ -340,7 +340,7 @@
           <div id="pr-card-body" class="w-full flex flex-col items-center text-center">
             <div id="pr-left-col" class="flex flex-col items-center">
               <div id="pr-illustration" onclick="onPronounceIllustrationClick()" class="w-40 h-40 sm:w-48 sm:h-48 flex items-center justify-center cursor-pointer transition-transform hover:scale-105"></div>
-              <button onclick="playCurrentPetAnimalSound()" class="btn-lego min-h-[60px] mt-4 py-2.5 px-6 rounded-2xl bg-[#FACC15] border-2 border-[#EAB308] shadow-[0_6px_0_#CA8A04] text-[#451A03] font-display text-[18px] font-bold flex items-center gap-2">
+              <button id="pr-sound-btn" onclick="playCurrentPetAnimalSound()" class="btn-lego min-h-[60px] mt-4 py-2.5 px-6 rounded-2xl bg-[#FACC15] border-2 border-[#EAB308] shadow-[0_6px_0_#CA8A04] text-[#451A03] font-display text-[18px] font-bold flex items-center gap-2">
                 <span>🔊</span><span id="pr-animal-sound-btn">Âm thanh</span>
               </button>
             </div>
@@ -1028,7 +1028,10 @@
     }
 
     function playAnimalSound(itemId) {
-      const sfxUrl = AUDIO_REGISTRY[itemId] || AUDIO_REGISTRY.chime;
+      const petIds = ['cat', 'dog', 'bird', 'fish', 'rabbit', 'hamster'];
+      if (!petIds.includes(itemId)) return;
+      const sfxUrl = AUDIO_REGISTRY[itemId];
+      if (!sfxUrl) return;
       playMp3Audio(sfxUrl, null, () => {
         try {
           const ctx = getAudioCtx();
@@ -1379,15 +1382,24 @@
           <div class="font-display text-[20px] font-bold text-[#14532D] bg-[#DCFCE7] px-4 py-1 rounded-2xl mt-1">${item.meaning}</div>
           <div id="svg-wrap-${item.id}" class="w-32 h-32 sm:w-36 sm:h-36 flex items-center justify-center my-2">${item.svg}</div>
           <div class="font-display font-bold text-3xl sm:text-4xl text-[#FF6B35] leading-none mb-3">${item.word}</div>
-          <div class="w-full grid grid-cols-2 gap-3 pt-3 border-t-2 border-[#F0F9FF]">
-            <button onclick="event.stopPropagation(); bouncePetCard('${item.id}'); playAnimalSound('${item.id}')"
-              class="btn-lego min-h-[60px] py-2 px-2 rounded-2xl bg-[#FACC15] border-2 border-[#EAB308] shadow-[0_5px_0_#CA8A04] text-[#451A03] font-display text-[16px] font-bold truncate">
-              🔊 ${item.soundLabel}
-            </button>
+          <div class="w-full pt-3 border-t-2 border-[#F0F9FF]">
+            ${currentTopicId === 'pets' ? `
+            <div class="grid grid-cols-2 gap-3 w-full">
+              <button onclick="event.stopPropagation(); bouncePetCard('${item.id}'); playAnimalSound('${item.id}')"
+                class="btn-lego min-h-[60px] py-2 px-2 rounded-2xl bg-[#FACC15] border-2 border-[#EAB308] shadow-[0_5px_0_#CA8A04] text-[#451A03] font-display text-[16px] font-bold truncate">
+                🔊 ${item.soundLabel}
+              </button>
+              <button onclick="event.stopPropagation(); bouncePetCard('${item.id}'); speakWord('${item.word}')"
+                class="btn-lego min-h-[60px] py-2 px-2 rounded-2xl bg-[#0EA5E9] border-2 border-[#0284C7] shadow-[0_5px_0_#0369A1] text-white font-display text-[16px] font-bold">
+                🗣️ Đọc tên
+              </button>
+            </div>
+            ` : `
             <button onclick="event.stopPropagation(); bouncePetCard('${item.id}'); speakWord('${item.word}')"
-              class="btn-lego min-h-[60px] py-2 px-2 rounded-2xl bg-[#0EA5E9] border-2 border-[#0284C7] shadow-[0_5px_0_#0369A1] text-white font-display text-[16px] font-bold">
-              🗣️ Đọc tên
+              class="btn-lego w-full min-h-[60px] py-2 px-4 rounded-2xl bg-[#0EA5E9] border-2 border-[#0284C7] shadow-[0_5px_0_#0369A1] text-white font-display text-[18px] font-bold flex items-center justify-center gap-2">
+              <span class="text-xl">🗣️</span><span>Đọc tên</span>
             </button>
+            `}
           </div>
         `;
         card.addEventListener('click', () => triggerCardSpeak(item));
@@ -1406,8 +1418,12 @@
 
     function triggerCardSpeak(item) {
       bouncePetCard(item.id);
-      playAnimalSound(item.id);
-      setTimeout(() => speakWord(item.word, false), 420);
+      if (currentTopicId === 'pets') {
+        playAnimalSound(item.id);
+        setTimeout(() => speakWord(item.word, false), 420);
+      } else {
+        speakWord(item.word, false);
+      }
     }
 
     function toggleLearned(id) {
@@ -1479,6 +1495,10 @@
       ipaEl.style.display = currentAgeMode === 'elementary' ? 'inline-block' : 'none';
       document.getElementById('pr-meaning').textContent = item.meaning;
       document.getElementById('pr-sentence').textContent = item.sentence;
+      const prBtn = document.getElementById('pr-sound-btn');
+      if (prBtn) {
+        prBtn.style.display = currentTopicId === 'pets' ? 'flex' : 'none';
+      }
       document.getElementById('pr-animal-sound-btn').textContent = item.soundLabel;
 
       const s = pronounceStars[item.id] || 0;
@@ -1488,8 +1508,16 @@
     }
 
     function onPronounceIllustrationClick() {
-      playCurrentPetAnimalSound();
-      setTimeout(() => speakPronounceTarget(false), 450);
+      if (currentTopicId === 'pets') {
+        playCurrentPetAnimalSound();
+        setTimeout(() => speakPronounceTarget(false), 450);
+      } else {
+        const illu = document.getElementById('pr-illustration');
+        if (illu) {
+          illu.classList.remove('animate-pop-bounce'); void illu.offsetWidth; illu.classList.add('animate-pop-bounce');
+        }
+        speakPronounceTarget(false);
+      }
     }
     function playCurrentPetAnimalSound() {
       const item = getActiveItems()[currentPronounceIdx];
@@ -1568,6 +1596,25 @@
       currentQuizTarget = items[0];
       const opts = items.slice(0, 4).sort(() => Math.random() - 0.5);
 
+      // Hide "Âm thanh" quiz mode button if not pets topic
+      const qSoundBtn = document.getElementById('qmode-sound');
+      if (qSoundBtn) {
+        if (currentTopicId !== 'pets') {
+          qSoundBtn.style.display = 'none';
+          if (quizMode === 'sound') quizMode = 'listen';
+        } else {
+          qSoundBtn.style.display = 'inline-flex';
+        }
+      }
+      ['sound','listen','image'].forEach(k => {
+        const b = document.getElementById(`qmode-${k}`);
+        if (b) {
+          b.className = k === quizMode
+            ? 'btn-lego min-h-[56px] px-4 py-2 rounded-2xl font-display text-[17px] font-bold bg-[#A855F7] text-white border-2 border-[#9333EA] shadow-[0_5px_0_#6B21A8]'
+            : 'btn-lego min-h-[56px] px-4 py-2 rounded-2xl font-display text-[17px] font-bold bg-white text-[#6B21A8] border-2 border-[#D8B4FE] shadow-[0_5px_0_#C084FC]';
+        }
+      });
+
       const ap = document.getElementById('quiz-audio-prompt'), ip = document.getElementById('quiz-image-prompt'), ins = document.getElementById('quiz-instruction');
       if (quizMode === 'sound' || quizMode === 'listen') {
         ins.textContent = quizMode === 'sound' ? 'Lắng nghe âm thanh và chọn hình đúng nhé!' : 'Nghe đọc tiếng Anh và chọn hình đúng nhé!';
@@ -1597,8 +1644,11 @@
     }
     function playQuizAudio() {
       if (!currentQuizTarget) return;
-      if (quizMode === 'sound') playAnimalSound(currentQuizTarget.id);
-      else speakWord(currentQuizTarget.word, false);
+      if (quizMode === 'sound' && currentTopicId === 'pets') {
+        playAnimalSound(currentQuizTarget.id);
+      } else {
+        speakWord(currentQuizTarget.word, false);
+      }
     }
     function handleQuizAnswer(sel, btn) {
       if (isQuizLocked) return;
