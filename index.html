@@ -157,23 +157,171 @@
       margin-right: auto;
     }
 
+    /* Dual Mode: Mobile Simulator & Real Screen Optimization */
     #app-shell[data-mode="mobile"] {
-      max-width: 450px;
-      min-height: 820px;
-      border-radius: 2.75rem;
-      border: 8px solid #38BDF8;
-      box-shadow: 0 12px 0 #0284C7, 0 24px 40px rgba(14, 165, 233, 0.22);
+      max-width: 420px;
+      width: 100%;
+      height: min(840px, 86vh);
+      border-radius: 2.5rem;
+      border: 7px solid #38BDF8;
+      box-shadow: 0 12px 0 #0284C7, 0 20px 35px rgba(14, 165, 233, 0.22);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #app-shell[data-mode="mobile"] header {
+      padding: 0.85rem 0.75rem 0.65rem !important;
+      gap: 0.5rem !important;
+    }
+
+    #app-shell[data-mode="mobile"] #header-topic-subtitle {
+      font-size: 14.5px !important;
+    }
+
+    #app-shell[data-mode="mobile"] #topic-selector {
+      gap: 0.4rem !important;
+      padding-bottom: 0.25rem !important;
+    }
+    #app-shell[data-mode="mobile"] #topic-selector button {
+      min-height: 42px !important;
+      padding: 0.35rem 0.65rem !important;
+      font-size: 13.5px !important;
+      border-radius: 0.75rem !important;
+    }
+
+    #app-shell[data-mode="mobile"] #area-btn-learn,
+    #app-shell[data-mode="mobile"] #area-btn-games,
+    #app-shell[data-mode="mobile"] #area-btn-pethouse {
+      min-height: 48px !important;
+      font-size: 14.5px !important;
+      padding: 0.35rem 0.2rem !important;
+      border-radius: 0.75rem !important;
+    }
+
+    #app-shell[data-mode="mobile"] #subnav-learn {
+      gap: 0.35rem !important;
+    }
+    #app-shell[data-mode="mobile"] #subnav-learn .tab-btn {
+      min-height: 50px !important;
+      padding: 0.35rem 0.1rem !important;
+      font-size: 12px !important;
+      line-height: 1.15 !important;
+      border-radius: 0.75rem !important;
+    }
+    #app-shell[data-mode="mobile"] #subnav-learn .tab-btn span:first-child {
+      font-size: 1.15rem !important;
+    }
+
+    #app-shell[data-mode="mobile"] #subnav-games {
+      gap: 0.35rem !important;
+    }
+    #app-shell[data-mode="mobile"] #subnav-games .tab-btn {
+      min-height: 50px !important;
+      padding: 0.35rem 0.2rem !important;
+      font-size: 12.5px !important;
+      line-height: 1.15 !important;
+      border-radius: 0.75rem !important;
+    }
+
+    #app-shell[data-mode="mobile"] main {
+      padding: 0.75rem !important;
     }
 
     #app-shell[data-mode="mobile"] #pets-grid,
     #app-shell[data-mode="mobile"] #quiz-options {
       grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-      gap: 1rem !important;
+      gap: 0.65rem !important;
+    }
+
+    #app-shell[data-mode="mobile"] .card-pet {
+      padding: 0.65rem !important;
+      border-radius: 1.25rem !important;
+    }
+    #app-shell[data-mode="mobile"] .card-pet div[id^="svg-wrap-"] {
+      width: 6.5rem !important;
+      height: 6.5rem !important;
     }
 
     #app-shell[data-mode="mobile"] #memory-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-      gap: 0.75rem !important;
+      gap: 0.5rem !important;
+    }
+
+    #app-shell[data-mode="mobile"] #sentence-workspace > div:first-child {
+      flex-direction: column !important;
+      padding: 0.75rem !important;
+    }
+
+    #app-shell[data-mode="mobile"] #sentence-slots button {
+      min-height: 50px !important;
+      font-size: 1.15rem !important;
+    }
+
+    /* On real mobile viewports (<640px) */
+    @media (max-width: 640px) {
+      body {
+        padding-top: 4.5rem !important;
+        padding-left: 0.35rem !important;
+        padding-right: 0.35rem !important;
+        padding-bottom: 1.5rem !important;
+      }
+      aside {
+        max-width: calc(100vw - 0.75rem) !important;
+        padding: 0.25rem 0.5rem !important;
+      }
+      aside button {
+        min-height: 38px !important;
+        padding: 0.25rem 0.5rem !important;
+        font-size: 13px !important;
+      }
+      #app-shell {
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: unset !important;
+        border-radius: 1.5rem !important;
+        border-width: 4px !important;
+        box-shadow: 0 8px 0 #0284C7 !important;
+      }
+      #phone-notch {
+        display: none !important;
+      }
+      header {
+        padding: 0.75rem 0.65rem 0.65rem !important;
+        gap: 0.5rem !important;
+      }
+      #subnav-learn {
+        gap: 0.25rem !important;
+      }
+      #subnav-learn .tab-btn {
+        min-height: 48px !important;
+        padding: 0.25rem 0.1rem !important;
+        font-size: 11px !important;
+        border-radius: 0.65rem !important;
+      }
+      #subnav-games .tab-btn {
+        min-height: 48px !important;
+        padding: 0.25rem 0.2rem !important;
+        font-size: 12px !important;
+        border-radius: 0.65rem !important;
+      }
+      #area-btn-learn, #area-btn-games, #area-btn-pethouse {
+        min-height: 46px !important;
+        font-size: 14px !important;
+        padding: 0.3rem 0.15rem !important;
+      }
+      #topic-selector button {
+        min-height: 40px !important;
+        padding: 0.3rem 0.65rem !important;
+        font-size: 13px !important;
+      }
+      main {
+        padding: 0.65rem !important;
+      }
+      #pets-grid, #quiz-options {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.55rem !important;
+      }
     }
 
     .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -1264,6 +1412,7 @@
           : 'btn-lego shrink-0 min-h-[52px] px-4 py-2 rounded-2xl font-display text-base font-bold bg-white text-[#0369A1] border-2 border-[#BAE6FD] shadow-[0_4px_0_#7DD3FC] flex items-center gap-2';
         btn.innerHTML = `<span class="text-xl">${t.icon}</span><span>${t.titleVi}</span>`;
         el.appendChild(btn);
+        if (active) setTimeout(() => btn.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' }), 40);
       });
       document.getElementById('header-topic-subtitle').textContent = `Chủ đề: ${getCurrentTopic().titleVi} (${getCurrentTopic().titleEn})`;
     }
