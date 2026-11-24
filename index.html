@@ -963,113 +963,137 @@
       return appAudioContext;
     }
 
-    function playPopSound() {
+    // =========================================================================
+    // AUDIO ENGINE: STUDIO MP3 FIRST WITH FALLBACK TO WEB AUDIO & WEB SPEECH
+    // =========================================================================
+    const AUDIO_REGISTRY = {
+      pop: 'audio/sfx/pop.mp3',
+      correct: 'audio/sfx/correct.mp3',
+      wrong: 'audio/sfx/wrong.mp3',
+      star: 'audio/sfx/star.mp3',
+      applause: 'audio/sfx/applause.mp3',
+      chomp: 'audio/sfx/chomp.mp3',
+      click: 'audio/sfx/click.mp3',
+      cat: 'audio/sfx/cat.mp3',
+      dog: 'audio/sfx/dog.mp3',
+      bird: 'audio/sfx/bird.mp3',
+      fish: 'audio/sfx/fish.mp3',
+      rabbit: 'audio/sfx/rabbit.mp3',
+      hamster: 'audio/sfx/hamster.mp3',
+      chime: 'audio/sfx/chime.mp3',
+      yummy: 'audio/phrases/yummy.mp3',
+      hello: 'audio/phrases/hello.mp3'
+    };
+
+    let activeAudio = null;
+
+    function playMp3Audio(url, onEnded, onError) {
       try {
-        const ctx = getAudioCtx();
-        if (!ctx) return;
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(520, now);
-        osc.frequency.exponentialRampToValueAtTime(900, now + 0.06);
-        gain.gain.setValueAtTime(0.22, now);
-        gain.gain.exponentialRampToValueAtTime(0.005, now + 0.07);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(now); osc.stop(now + 0.075);
-      } catch (e) {}
+        if (activeAudio) {
+          activeAudio.pause();
+          activeAudio.currentTime = 0;
+        }
+        const audio = new Audio(url);
+        activeAudio = audio;
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            if (onEnded) audio.onended = onEnded;
+          }).catch(err => {
+            if (onError) onError(err);
+          });
+        }
+        return audio;
+      } catch (e) {
+        if (onError) onError(e);
+        return null;
+      }
+    }
+
+    function playPopSound() {
+      playMp3Audio(AUDIO_REGISTRY.pop, null, () => {
+        try {
+          const ctx = getAudioCtx();
+          if (!ctx) return;
+          const now = ctx.currentTime, osc = ctx.createOscillator(), gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(520, now);
+          osc.frequency.exponentialRampToValueAtTime(900, now + 0.06);
+          gain.gain.setValueAtTime(0.22, now);
+          gain.gain.exponentialRampToValueAtTime(0.005, now + 0.07);
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 0.075);
+        } catch (e) {}
+      });
     }
 
     function playAnimalSound(itemId) {
-      try {
-        const ctx = getAudioCtx();
-        if (!ctx) return;
-        const now = ctx.currentTime;
-
-        if (itemId === 'cat') {
-          const osc = ctx.createOscillator(), filter = ctx.createBiquadFilter(), gain = ctx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(360, now);
-          osc.frequency.exponentialRampToValueAtTime(780, now + 0.18);
-          osc.frequency.exponentialRampToValueAtTime(450, now + 0.52);
-          filter.type = 'bandpass'; filter.frequency.setValueAtTime(1200, now); filter.Q.value = 3.5;
-          gain.gain.setValueAtTime(0.01, now); gain.gain.linearRampToValueAtTime(0.35, now + 0.08); gain.gain.exponentialRampToValueAtTime(0.005, now + 0.55);
-          osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-          osc.start(now); osc.stop(now + 0.58);
-        } else if (itemId === 'dog') {
-          [0, 0.2].forEach(off => {
-            const t = now + off, osc = ctx.createOscillator(), gain = ctx.createGain();
-            osc.type = 'triangle'; osc.frequency.setValueAtTime(420, t); osc.frequency.exponentialRampToValueAtTime(140, t + 0.13);
-            gain.gain.setValueAtTime(0.45, t); gain.gain.exponentialRampToValueAtTime(0.005, t + 0.14);
-            osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.15);
-          });
-        } else if (itemId === 'bird') {
-          [0, 0.11, 0.23].forEach(off => {
-            const t = now + off, osc = ctx.createOscillator(), gain = ctx.createGain();
-            osc.type = 'sine'; osc.frequency.setValueAtTime(2200, t); osc.frequency.exponentialRampToValueAtTime(3500, t + 0.04);
-            gain.gain.setValueAtTime(0.28, t); gain.gain.exponentialRampToValueAtTime(0.005, t + 0.08);
-            osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.085);
-          });
-        } else if (itemId === 'fish') {
-          [0, 0.1, 0.22, 0.34].forEach((off, i) => {
-            const t = now + off, osc = ctx.createOscillator(), gain = ctx.createGain();
-            const f = [460, 680, 540, 820][i];
-            osc.type = 'sine'; osc.frequency.setValueAtTime(f * 0.7, t); osc.frequency.exponentialRampToValueAtTime(f * 1.5, t + 0.055);
-            gain.gain.setValueAtTime(0.32, t); gain.gain.exponentialRampToValueAtTime(0.005, t + 0.065);
-            osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.07);
-          });
-        } else if (itemId === 'rabbit' || itemId === 'hamster') {
-          [0, 0.12, 0.24].forEach(off => {
-            const t = now + off, osc = ctx.createOscillator(), gain = ctx.createGain();
-            osc.type = 'triangle'; osc.frequency.setValueAtTime(1600, t); osc.frequency.exponentialRampToValueAtTime(2400, t + 0.04);
-            gain.gain.setValueAtTime(0.25, t); gain.gain.exponentialRampToValueAtTime(0.005, t + 0.08);
-            osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.085);
-          });
-        } else {
-          // Playful xylophone chime for Colors / Numbers / Food / Actions
-          const notes = [523, 587, 659, 698, 784, 880];
-          const idx = Math.abs(itemId.charCodeAt(0) + itemId.length) % notes.length;
-          const osc = ctx.createOscillator(), gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(notes[idx], now);
-          osc.frequency.exponentialRampToValueAtTime(notes[idx] * 1.25, now + 0.12);
-          gain.gain.setValueAtTime(0.3, now);
-          gain.gain.exponentialRampToValueAtTime(0.005, now + 0.25);
-          osc.connect(gain); gain.connect(ctx.destination);
-          osc.start(now); osc.stop(now + 0.26);
-        }
-      } catch (e) {}
+      const sfxUrl = AUDIO_REGISTRY[itemId] || AUDIO_REGISTRY.chime;
+      playMp3Audio(sfxUrl, null, () => {
+        try {
+          const ctx = getAudioCtx();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          if (itemId === 'cat') {
+            const osc = ctx.createOscillator(), filter = ctx.createBiquadFilter(), gain = ctx.createGain();
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(360, now);
+            osc.frequency.exponentialRampToValueAtTime(780, now + 0.18);
+            osc.frequency.exponentialRampToValueAtTime(450, now + 0.52);
+            filter.type = 'bandpass'; filter.frequency.setValueAtTime(1200, now); filter.Q.value = 3.5;
+            gain.gain.setValueAtTime(0.01, now); gain.gain.linearRampToValueAtTime(0.35, now + 0.08); gain.gain.exponentialRampToValueAtTime(0.005, now + 0.55);
+            osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+            osc.start(now); osc.stop(now + 0.58);
+          } else if (itemId === 'dog') {
+            [0, 0.2].forEach(off => {
+              const t = now + off, osc = ctx.createOscillator(), gain = ctx.createGain();
+              osc.type = 'triangle'; osc.frequency.setValueAtTime(420, t); osc.frequency.exponentialRampToValueAtTime(140, t + 0.13);
+              gain.gain.setValueAtTime(0.45, t); gain.gain.exponentialRampToValueAtTime(0.005, t + 0.14);
+              osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.15);
+            });
+          } else {
+            const notes = [523, 587, 659, 698, 784, 880];
+            const idx = Math.abs(itemId.charCodeAt(0) + itemId.length) % notes.length;
+            const osc = ctx.createOscillator(), gain = ctx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(notes[idx], now);
+            osc.frequency.exponentialRampToValueAtTime(notes[idx] * 1.25, now + 0.12);
+            gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.005, now + 0.25);
+            osc.connect(gain); gain.connect(ctx.destination); osc.start(now); osc.stop(now + 0.26);
+          }
+        } catch (e) {}
+      });
     }
 
     function playApplause() {
-      try {
-        const ctx = getAudioCtx();
-        if (!ctx) return;
-        const now = ctx.currentTime, duration = 1.4;
-        const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * duration), ctx.sampleRate);
-        const data = buf.getChannelData(0);
-        for (let i = 0; i < data.length; i++) {
-          data[i] = (Math.random() * 2 - 1) * 0.35 + (Math.random() > 0.86 ? (Math.random() * 2 - 1) * 2.5 : 0);
-        }
-        const noise = ctx.createBufferSource(); noise.buffer = buf;
-        const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 1150;
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.01, now); gain.gain.linearRampToValueAtTime(0.4, now + 0.1); gain.gain.exponentialRampToValueAtTime(0.005, now + duration);
-        noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-        noise.start(now); noise.stop(now + duration);
-
-        if (typeof Tone !== 'undefined') {
-          Tone.start().then(() => {
-            const synth = new Tone.PolySynth(Tone.Synth).toDestination();
-            const t = Tone.now();
-            synth.triggerAttackRelease(['C5', 'E5', 'G5'], '8n', t);
-            synth.triggerAttackRelease(['E5', 'G5', 'C6'], '4n', t + 0.18);
-          }).catch(() => {});
-        }
-      } catch (e) {}
+      playMp3Audio(AUDIO_REGISTRY.applause, null, () => {
+        try {
+          const ctx = getAudioCtx();
+          if (!ctx) return;
+          const now = ctx.currentTime, duration = 1.4;
+          const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * duration), ctx.sampleRate);
+          const data = buf.getChannelData(0);
+          for (let i = 0; i < data.length; i++) {
+            data[i] = (Math.random() * 2 - 1) * 0.35 + (Math.random() > 0.86 ? (Math.random() * 2 - 1) * 2.5 : 0);
+          }
+          const noise = ctx.createBufferSource(); noise.buffer = buf;
+          const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 1150;
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.01, now); gain.gain.linearRampToValueAtTime(0.4, now + 0.1); gain.gain.exponentialRampToValueAtTime(0.005, now + duration);
+          noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+          noise.start(now); noise.stop(now + duration);
+        } catch (e) {}
+      });
     }
 
     function playSoundEffect(type) {
+      const url = AUDIO_REGISTRY[type];
+      if (url) {
+        playMp3Audio(url, null, () => fallbackToneSound(type));
+      } else {
+        fallbackToneSound(type);
+      }
+    }
+
+    function fallbackToneSound(type) {
       try {
         if (typeof Tone === 'undefined') return;
         Tone.start().then(() => {
@@ -1090,7 +1114,55 @@
       } catch (e) {}
     }
 
+    const VOCAB_WORD_IDS = new Set([
+      'cat','dog','rabbit','hamster','bird','fish',
+      'red','blue','yellow','green','orange','purple',
+      'one','two','three','four','five','six',
+      'apple','banana','carrot','milk','cake','bone',
+      'jump','run','swim','fly','sleep','eat'
+    ]);
+
+    function getSentenceMap() {
+      const map = {};
+      TOPICS_DATA.forEach(t => {
+        t.items.forEach(it => {
+          const key = it.sentence.toLowerCase().trim().replace(/[.,!]/g, '');
+          map[key] = it.id;
+        });
+      });
+      return map;
+    }
+
     function speakWord(text, isSlow = false) {
+      if (!text) return;
+      const clean = text.toLowerCase().trim().replace(/[.,!]/g, '');
+
+      // 1. Single vocabulary word
+      if (VOCAB_WORD_IDS.has(clean)) {
+        const audioSrc = isSlow ? `audio/words_slow/${clean}.mp3` : `audio/words/${clean}.mp3`;
+        playMp3Audio(audioSrc, null, () => fallbackSpeechSynthesis(text, isSlow));
+        return;
+      }
+
+      // 2. Full sentence
+      const sentMap = getSentenceMap();
+      if (sentMap[clean]) {
+        const itemId = sentMap[clean];
+        playMp3Audio(`audio/sentences/${itemId}.mp3`, null, () => fallbackSpeechSynthesis(text, isSlow));
+        return;
+      }
+
+      // 3. Known phrases
+      if (clean.includes('yummy')) {
+        playMp3Audio(AUDIO_REGISTRY.yummy, null, () => fallbackSpeechSynthesis(text, isSlow));
+        return;
+      }
+
+      // 4. Default: Web Speech API
+      fallbackSpeechSynthesis(text, isSlow);
+    }
+
+    function fallbackSpeechSynthesis(text, isSlow) {
       if ('speechSynthesis' in window) {
         try {
           window.speechSynthesis.cancel();
@@ -1107,12 +1179,15 @@
     }
 
     function speakPraise() {
-      if ('speechSynthesis' in window) {
-        const list = ['Tuyệt vời quá bé ơi!', 'Bé thông minh lắm!', 'Hoan hô bé, giỏi quá!', 'Cô khen bé mười điểm luôn!'];
-        const u = new SpeechSynthesisUtterance(list[Math.floor(Math.random() * list.length)]);
-        u.lang = 'vi-VN'; u.pitch = 1.35; u.rate = 1.0;
-        window.speechSynthesis.speak(u);
-      }
+      const idx = Math.floor(Math.random() * 4) + 1;
+      playMp3Audio(`audio/praise/praise_${idx}.mp3`, null, () => {
+        if ('speechSynthesis' in window) {
+          const list = ['Tuyệt vời quá bé ơi!', 'Bé thông minh lắm!', 'Hoan hô bé, giỏi quá!', 'Cô khen bé mười điểm luôn!'];
+          const u = new SpeechSynthesisUtterance(list[idx - 1]);
+          u.lang = 'vi-VN'; u.pitch = 1.35; u.rate = 1.0;
+          window.speechSynthesis.speak(u);
+        }
+      });
     }
 
     function spawnKidParticles(x, y) {
@@ -1824,7 +1899,7 @@
             document.getElementById('feed-feedback').innerHTML = `<span class="text-[#15803D]">Ngon quá! Cảm ơn bé nhé! ❤️</span>`;
             const pSvg = document.getElementById('feed-pet-svg');
             pSvg.classList.remove('animate-pop-bounce'); void pSvg.offsetWidth; pSvg.classList.add('animate-pop-bounce');
-            playApplause(); launchConfetti(); speakWord('Yummy! Thank you!');
+            playSoundEffect('chomp'); playApplause(); launchConfetti(); speakWord('Yummy! Thank you!');
             setTimeout(initFeedGame, 1600);
           } else {
             playSoundEffect('wrong');
@@ -1877,7 +1952,7 @@
           : 'btn-lego w-14 h-16 rounded-2xl bg-[#FF6B35] border-2 border-[#EA580C] shadow-[0_5px_0_#C2410C] text-white font-display text-3xl font-bold';
         btn.textContent = l.ch;
         btn.onclick = () => {
-          playPopSound(); l.used = true; spellChosen.push(l); renderSpellingWorkspace();
+          playSoundEffect('click'); l.used = true; spellChosen.push(l); renderSpellingWorkspace();
           if (spellChosen.length === item.word.length) {
             const built = spellChosen.map(x => x.ch).join('').toLowerCase();
             if (built === item.word.toLowerCase()) {
