@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TOPO Kids - Tiếng Anh Vui Nhộn | Động Vật Nuôi</title>
+  <title>TOPO Kids - Tiếng Anh Vui Nhộn Cho Trẻ Em</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -17,16 +17,13 @@
       }
     };
   </script>
-  <!-- Google Fonts: Fredoka & Nunito (Tròn trịa, to rõ, hỗ trợ tiếng Việt hoàn hảo) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
-  <!-- Tone.js & Canvas Confetti -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
   <style>
-    /* Nền trời nắng ấm áp, tươi sáng cho trẻ nhỏ (tránh xám xịt ảm đạm) */
     body {
       font-family: 'Nunito', sans-serif;
       font-size: 18px;
@@ -44,7 +41,6 @@
       font-family: 'Fredoka', 'Nunito', sans-serif;
     }
 
-    /* Nút bấm 3D Chunky kiểu khối đồ chơi Lego / Duolingo */
     .btn-lego {
       transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.1s ease;
     }
@@ -52,7 +48,6 @@
       transform: translateY(4px);
     }
 
-    /* Hiệu ứng nảy nhẹ vui nhộn khi bé chạm hoặc trả lời đúng */
     @keyframes popBounce {
       0% { transform: scale(1); }
       35% { transform: scale(1.08) rotate(-2deg); }
@@ -74,7 +69,6 @@
       animation: shakeWrong 0.35s ease-in-out;
     }
 
-    /* Sóng âm khi bé nói vào micro */
     @keyframes eqWave {
       0%, 100% { height: 8px; }
       50% { height: 28px; }
@@ -86,7 +80,6 @@
     .eq-bar:nth-child(3) { animation-delay: 0.24s; }
     .eq-bar:nth-child(4) { animation-delay: 0.16s; }
 
-    /* Hạt sao / tim bay lên khi chạm trúng */
     @keyframes particleFloat {
       0% { transform: translateY(0) scale(0.6); opacity: 1; }
       100% { transform: translateY(-48px) scale(1.35); opacity: 0; }
@@ -98,11 +91,17 @@
       z-index: 100;
     }
 
-    /* =========================================================================
-       CHẾ ĐỘ WEB (MÀN HÌNH LỚN) vs MOBILE (ĐIỆN THOẠI)
-       ========================================================================= */
+    @keyframes bubbleBob {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    .bubble-bob {
+      animation: bubbleBob 2.2s ease-in-out infinite;
+    }
+
+    /* Dual Mode Layout Rules */
     #app-shell[data-mode="web"] {
-      max-width: 70rem; /* 1120px */
+      max-width: 72rem;
       border-radius: 2rem;
       border: 4px solid #38BDF8;
       box-shadow: 0 12px 0 #0284C7, 0 24px 40px rgba(14, 165, 233, 0.18);
@@ -143,13 +142,16 @@
       gap: 1.25rem !important;
     }
 
-    #app-shell[data-mode="web"] #match-board {
+    #app-shell[data-mode="web"] #memory-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
       max-width: 48rem;
       margin-left: auto;
       margin-right: auto;
     }
 
-    #app-shell[data-mode="web"] #sentence-workspace {
+    #app-shell[data-mode="web"] #match-board,
+    #app-shell[data-mode="web"] #sentence-workspace,
+    #app-shell[data-mode="web"] #spelling-workspace {
       max-width: 48rem;
       margin-left: auto;
       margin-right: auto;
@@ -163,14 +165,15 @@
       box-shadow: 0 12px 0 #0284C7, 0 24px 40px rgba(14, 165, 233, 0.22);
     }
 
-    #app-shell[data-mode="mobile"] #pets-grid {
+    #app-shell[data-mode="mobile"] #pets-grid,
+    #app-shell[data-mode="mobile"] #quiz-options {
       grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
       gap: 1rem !important;
     }
 
-    #app-shell[data-mode="mobile"] #quiz-options {
-      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-      gap: 1rem !important;
+    #app-shell[data-mode="mobile"] #memory-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 0.75rem !important;
     }
 
     .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -179,189 +182,190 @@
 </head>
 <body class="flex flex-col items-center justify-start min-h-screen pt-20 pb-10 px-3 sm:px-6">
 
-  <!-- ==================== CHUYỂN ĐỔI 2 CHẾ ĐỘ: WEB & MOBILE (3D CHUNKY) ==================== -->
-  <aside class="fixed top-3 z-50 flex items-center gap-3 bg-white border-2 border-[#BAE6FD] p-1.5 rounded-2xl shadow-[0_4px_0_#7DD3FC]" aria-label="Chọn chế độ hiển thị">
-    <button id="mode-btn-web" onclick="playPopSound(); switchViewMode('web')"
-      class="btn-lego min-h-[48px] flex items-center gap-2 px-4 py-2 rounded-xl font-display text-base font-bold transition">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-      <span>Bản Web</span>
-    </button>
-    <button id="mode-btn-mobile" onclick="playPopSound(); switchViewMode('mobile')"
-      class="btn-lego min-h-[48px] flex items-center gap-2 px-4 py-2 rounded-xl font-display text-base font-bold transition">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-      <span>Bản Mobile</span>
-    </button>
+  <!-- ==================== THANH CHUYỂN CHẾ ĐỘ & ĐỘ TUỔI ==================== -->
+  <aside class="fixed top-3 z-50 flex flex-wrap items-center justify-center gap-2 sm:gap-3 bg-white border-2 border-[#BAE6FD] p-1.5 rounded-2xl shadow-[0_4px_0_#7DD3FC]">
+    <div class="flex items-center gap-1.5">
+      <button id="mode-btn-web" onclick="playPopSound(); switchViewMode('web')"
+        class="btn-lego min-h-[44px] flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-display text-sm sm:text-base font-bold">
+        <span>💻</span><span>Web</span>
+      </button>
+      <button id="mode-btn-mobile" onclick="playPopSound(); switchViewMode('mobile')"
+        class="btn-lego min-h-[44px] flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-display text-sm sm:text-base font-bold">
+        <span>📱</span><span>Mobile</span>
+      </button>
+    </div>
+    <div class="w-0.5 h-6 bg-[#BAE6FD] hidden sm:block"></div>
+    <div class="flex items-center gap-1.5">
+      <button id="age-btn-preschool" onclick="playPopSound(); setAgeMode('preschool')"
+        class="btn-lego min-h-[44px] px-3 py-1.5 rounded-xl font-display text-sm sm:text-base font-bold" title="Ít chữ, dễ thương cho bé 4-5 tuổi">
+        🐣 4-5 tuổi
+      </button>
+      <button id="age-btn-elementary" onclick="playPopSound(); setAgeMode('elementary')"
+        class="btn-lego min-h-[44px] px-3 py-1.5 rounded-xl font-display text-sm sm:text-base font-bold" title="Có phiên âm & đánh vần cho bé 6-10 tuổi">
+        🚀 6-10 tuổi
+      </button>
+    </div>
   </aside>
 
-  <!-- ==================== KHUNG APP PLAYFUL KIDS EDTECH ==================== -->
+  <!-- ==================== KHUNG APP CHÍNH ==================== -->
   <div id="app-shell" data-mode="web" class="w-full bg-white flex flex-col overflow-hidden relative transition-all duration-200">
-    
-    <!-- Loa điện thoại cho Bản Mobile -->
     <div id="phone-notch" class="hidden absolute top-2.5 left-1/2 -translate-x-1/2 w-24 h-4 bg-[#0284C7] rounded-full z-30 pointer-events-none"></div>
 
-    <!-- HEADER VUI TƯƠI & RÕ RÀNG -->
-    <header class="px-5 sm:px-7 pt-6 pb-4 bg-[#F0F9FF] border-b-4 border-[#BAE6FD] sticky top-0 z-20">
-      <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-        <!-- Logo TOPO dạng khối 3D tròn trịa -->
-        <div class="flex items-center gap-3.5">
+    <!-- HEADER: LOGO, SAO TỔNG, CHỌN 5 CHỦ ĐỀ & 3 KHU VỰC CHÍNH -->
+    <header class="px-4 sm:px-7 pt-6 pb-4 bg-[#F0F9FF] border-b-4 border-[#BAE6FD] sticky top-0 z-20 space-y-4">
+      <!-- Hàng 1: Logo & Sao -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
           <div class="w-14 h-14 rounded-2xl bg-[#FF6B35] border-2 border-[#EA580C] shadow-[0_5px_0_#C2410C] text-white flex items-center justify-center font-display font-bold text-3xl">
             T
           </div>
           <div>
-            <h1 class="font-display font-bold text-[28px] sm:text-[34px] text-[#1E1B4B] leading-none tracking-tight">
+            <h1 class="font-display font-bold text-[26px] sm:text-[32px] text-[#1E1B4B] leading-none">
               TOPO <span class="text-[#FF6B35]">KIDS</span>
             </h1>
-            <p class="text-[18px] font-bold text-[#0369A1] mt-1 leading-tight">
+            <p id="header-topic-subtitle" class="text-[17px] sm:text-[18px] font-extrabold text-[#0369A1] mt-0.5 leading-tight">
               Chủ đề: Động Vật Nuôi
             </p>
           </div>
         </div>
 
-        <!-- Huy hiệu Ngôi sao Tiến độ (Tối thiểu 60px) -->
-        <div class="min-h-[60px] flex items-center gap-3 bg-[#FEF08A] border-2 border-[#FACC15] shadow-[0_5px_0_#CA8A04] px-4 py-2 rounded-2xl">
-          <svg class="w-8 h-8 text-[#EA580C]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-          <div>
-            <span class="text-xs font-extrabold text-[#854D0E] uppercase block leading-none">Bé đã thuộc</span>
-            <span id="progress-text" class="font-display font-bold text-[22px] text-[#451A03] leading-tight">1/6 từ</span>
+        <div class="flex items-center gap-3">
+          <div class="min-h-[56px] flex items-center gap-2.5 bg-[#FEF08A] border-2 border-[#FACC15] shadow-[0_5px_0_#CA8A04] px-4 py-1.5 rounded-2xl">
+            <span class="text-2xl">⭐</span>
+            <div>
+              <span class="text-xs font-extrabold text-[#854D0E] uppercase block leading-none">Tổng sao</span>
+              <span id="progress-text" class="font-display font-bold text-[20px] text-[#451A03] leading-tight">1/30 từ</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Thanh tiến độ mập mạp kẹo ngọt -->
-      <div class="w-full h-5 bg-white border-2 border-[#BAE6FD] rounded-full overflow-hidden p-0.5 mb-5">
-        <div id="progress-bar" class="h-full bg-[#22C55E] rounded-full transition-all duration-300" style="width: 17%"></div>
+      <!-- Hàng 2: Chọn 5 Chủ Đề Học Tập (Curriculum Roadmap) -->
+      <div id="topic-selector" class="flex items-center gap-2.5 overflow-x-auto no-scrollbar pb-1">
+        <!-- Render bằng JS -->
       </div>
 
-      <!-- Thanh Điều Hướng 5 Bước (Nút lớn >= 60px, Spacing rộng) -->
-      <nav class="grid grid-cols-5 gap-2 sm:gap-4">
-        <button onclick="playPopSound(); switchTab('grid')" id="tab-grid" class="btn-lego tab-btn min-h-[64px] py-2 px-1 rounded-2xl font-display font-bold text-sm sm:text-[18px] flex flex-col items-center justify-center gap-1 bg-[#FF6B35] text-white border-2 border-[#EA580C] shadow-[0_5px_0_#C2410C]">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-          <span>Từ vựng</span>
+      <!-- Hàng 3: 3 Khu Vực Chính (Học Bài | Khu Trò Chơi | Nhà Thú Cưng) -->
+      <div class="grid grid-cols-3 gap-2.5 sm:gap-4">
+        <button id="area-btn-learn" onclick="playPopSound(); switchArea('learn')"
+          class="btn-lego min-h-[60px] rounded-2xl font-display font-bold text-base sm:text-[19px] flex items-center justify-center gap-2">
+          <span>📚</span><span>Học bài</span>
         </button>
-        <button onclick="playPopSound(); switchTab('pronounce')" id="tab-pronounce" class="btn-lego tab-btn min-h-[64px] py-2 px-1 rounded-2xl font-display font-bold text-sm sm:text-[18px] flex flex-col items-center justify-center gap-1 bg-white text-[#0369A1] border-2 border-[#BAE6FD] shadow-[0_5px_0_#7DD3FC]">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3z"/></svg>
-          <span>Phát âm</span>
+        <button id="area-btn-games" onclick="playPopSound(); switchArea('games')"
+          class="btn-lego min-h-[60px] rounded-2xl font-display font-bold text-base sm:text-[19px] flex items-center justify-center gap-2">
+          <span>🎮</span><span>Trò chơi</span>
         </button>
-        <button onclick="playPopSound(); switchTab('quiz')" id="tab-quiz" class="btn-lego tab-btn min-h-[64px] py-2 px-1 rounded-2xl font-display font-bold text-sm sm:text-[18px] flex flex-col items-center justify-center gap-1 bg-white text-[#0369A1] border-2 border-[#BAE6FD] shadow-[0_5px_0_#7DD3FC]">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <span>Đố vui</span>
+        <button id="area-btn-pethouse" onclick="playPopSound(); switchArea('pethouse')"
+          class="btn-lego min-h-[60px] rounded-2xl font-display font-bold text-base sm:text-[19px] flex items-center justify-center gap-2">
+          <span>🏡</span><span>Nhà thú</span>
         </button>
-        <button onclick="playPopSound(); switchTab('match')" id="tab-match" class="btn-lego tab-btn min-h-[64px] py-2 px-1 rounded-2xl font-display font-bold text-sm sm:text-[18px] flex flex-col items-center justify-center gap-1 bg-white text-[#0369A1] border-2 border-[#BAE6FD] shadow-[0_5px_0_#7DD3FC]">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-          <span>Nối từ</span>
+      </div>
+
+      <!-- Hàng 4A: Sub-tabs cho Khu Học Bài (5 bước) -->
+      <nav id="subnav-learn" class="grid grid-cols-5 gap-2 sm:gap-3">
+        <button onclick="playPopSound(); switchTab('grid')" id="tab-grid" class="btn-lego tab-btn min-h-[60px] py-2 px-1 rounded-2xl font-display font-bold text-xs sm:text-[17px] flex flex-col items-center justify-center gap-0.5">
+          <span>🐾</span><span>Từ vựng</span>
         </button>
-        <button onclick="playPopSound(); switchTab('sentence')" id="tab-sentence" class="btn-lego tab-btn min-h-[64px] py-2 px-1 rounded-2xl font-display font-bold text-sm sm:text-[18px] flex flex-col items-center justify-center gap-1 bg-white text-[#0369A1] border-2 border-[#BAE6FD] shadow-[0_5px_0_#7DD3FC]">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-          <span>Ghép câu</span>
+        <button onclick="playPopSound(); switchTab('pronounce')" id="tab-pronounce" class="btn-lego tab-btn min-h-[60px] py-2 px-1 rounded-2xl font-display font-bold text-xs sm:text-[17px] flex flex-col items-center justify-center gap-0.5">
+          <span>🎙️</span><span>Phát âm</span>
+        </button>
+        <button onclick="playPopSound(); switchTab('quiz')" id="tab-quiz" class="btn-lego tab-btn min-h-[60px] py-2 px-1 rounded-2xl font-display font-bold text-xs sm:text-[17px] flex flex-col items-center justify-center gap-0.5">
+          <span>❓</span><span>Đố vui</span>
+        </button>
+        <button onclick="playPopSound(); switchTab('match')" id="tab-match" class="btn-lego tab-btn min-h-[60px] py-2 px-1 rounded-2xl font-display font-bold text-xs sm:text-[17px] flex flex-col items-center justify-center gap-0.5">
+          <span>🔗</span><span>Nối từ</span>
+        </button>
+        <button onclick="playPopSound(); switchTab('sentence')" id="tab-sentence" class="btn-lego tab-btn min-h-[60px] py-2 px-1 rounded-2xl font-display font-bold text-xs sm:text-[17px] flex flex-col items-center justify-center gap-0.5">
+          <span>🧩</span><span>Ghép câu</span>
+        </button>
+      </nav>
+
+      <!-- Hàng 4B: Sub-tabs cho Khu Trò Chơi (4 Mini-games mới) -->
+      <nav id="subnav-games" class="hidden grid-cols-4 gap-2 sm:gap-3">
+        <button onclick="playPopSound(); switchTab('memory')" id="tab-memory" class="btn-lego tab-btn min-h-[60px] py-2 px-1 rounded-2xl font-display font-bold text-xs sm:text-[17px] flex flex-col items-center justify-center gap-0.5">
+          <span>🃏</span><span>Lật thẻ</span>
+        </button>
+        <button onclick="playPopSound(); switchTab('bubble')" id="tab-bubble" class="btn-lego tab-btn min-h-[60px] py-2 px-1 rounded-2xl font-display font-bold text-xs sm:text-[17px] flex flex-col items-center justify-center gap-0.5">
+          <span>🫧</span><span>Bong bóng</span>
+        </button>
+        <button onclick="playPopSound(); switchTab('feed')" id="tab-feed" class="btn-lego tab-btn min-h-[60px] py-2 px-1 rounded-2xl font-display font-bold text-xs sm:text-[17px] flex flex-col items-center justify-center gap-0.5">
+          <span>🥕</span><span>Cho ăn</span>
+        </button>
+        <button onclick="playPopSound(); switchTab('spelling')" id="tab-spelling" class="btn-lego tab-btn min-h-[60px] py-2 px-1 rounded-2xl font-display font-bold text-xs sm:text-[17px] flex flex-col items-center justify-center gap-0.5">
+          <span>🔤</span><span>Đánh vần</span>
         </button>
       </nav>
     </header>
 
     <!-- NỘI DUNG CHÍNH -->
-    <main class="flex-1 overflow-y-auto no-scrollbar p-5 sm:p-7 bg-[#FFFDF7]">
+    <main class="flex-1 overflow-y-auto no-scrollbar p-4 sm:p-7 bg-[#FFFDF7]">
 
-      <!-- ==================== BƯỚC 1: KHÁM PHÁ TỪ VỰNG ==================== -->
+      <!-- ==================== 1. TỪ VỰNG (GRID) ==================== -->
       <section id="view-grid" class="space-y-6">
-        <!-- Hướng dẫn lớn & Nút đọc tất cả -->
         <div class="flex flex-wrap items-center justify-between gap-4 bg-[#E0F2FE] border-2 border-[#7DD3FC] rounded-3xl p-4 sm:px-6">
-          <p class="text-[18px] sm:text-[20px] font-extrabold text-[#0C4A6E] leading-snug">
-            Bé chạm vào con vật để nghe tiếng kêu và đọc tên nhé!
+          <p class="text-[18px] sm:text-[20px] font-extrabold text-[#0C4A6E]">
+            Chạm vào từng thẻ để nghe âm thanh & phát âm nhé!
           </p>
-          <button onclick="playPopSound(); playAllSequence()" id="btn-play-all" class="btn-lego min-h-[60px] bg-[#0EA5E9] hover:bg-[#0284C7] border-2 border-[#0284C7] shadow-[0_6px_0_#0369A1] active:shadow-[0_2px_0_#0369A1] text-white px-6 py-3 rounded-2xl font-display text-[18px] font-bold flex items-center gap-2.5">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-            <span>Đọc hết</span>
+          <button onclick="playPopSound(); playAllSequence()" id="btn-play-all" class="btn-lego min-h-[60px] bg-[#0EA5E9] hover:bg-[#0284C7] border-2 border-[#0284C7] shadow-[0_6px_0_#0369A1] text-white px-6 py-3 rounded-2xl font-display text-[18px] font-bold flex items-center gap-2">
+            <span>🔊</span><span>Đọc hết</span>
           </button>
         </div>
 
-        <!-- Lưới 6 thẻ động vật (Spacing >= 16-24px) -->
-        <div id="pets-grid" class="grid grid-cols-2 gap-4 sm:gap-6">
-          <!-- Render bằng JS -->
-        </div>
+        <div id="pets-grid" class="grid grid-cols-2 gap-4 sm:gap-6"></div>
 
-        <!-- Nút Bước Tiếp Theo to bự dạng Lego 3D -->
         <div class="pt-2">
-          <button onclick="playPopSound(); switchTab('pronounce')" class="btn-lego min-h-[68px] w-full bg-[#22C55E] hover:bg-[#16A34A] border-2 border-[#16A34A] shadow-[0_7px_0_#15803D] active:shadow-[0_2px_0_#15803D] text-white font-display font-bold py-4 px-6 rounded-3xl flex items-center justify-center gap-3 text-[20px] sm:text-[22px]">
-            <span>Tiếp tục: Tập Phát Âm</span>
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+          <button onclick="playPopSound(); switchTab('pronounce')" class="btn-lego min-h-[64px] w-full bg-[#22C55E] hover:bg-[#16A34A] border-2 border-[#16A34A] shadow-[0_7px_0_#15803D] text-white font-display font-bold py-4 px-6 rounded-3xl flex items-center justify-center gap-3 text-[20px]">
+            <span>Tiếp tục: Tập Phát Âm</span><span>&rarr;</span>
           </button>
         </div>
       </section>
 
-      <!-- ==================== BƯỚC 2: TẬP PHÁT ÂM ==================== -->
+      <!-- ==================== 2. TẬP PHÁT ÂM ==================== -->
       <section id="view-pronounce" class="hidden flex-col justify-between space-y-6">
-        <!-- Chọn nhanh 6 từ -->
         <div class="bg-[#F0FDF4] rounded-3xl border-2 border-[#86EFAC] p-4 sm:p-5">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <span class="font-display text-[20px] font-bold text-[#14532D]">Chọn bạn nhỏ để luyện nói:</span>
-            <span id="pronounce-progress-badge" class="text-[18px] font-display font-bold bg-[#22C55E] text-white px-4 py-1 rounded-xl shadow-[0_3px_0_#15803D]">
-              0/6 từ đã nói
-            </span>
+            <span class="font-display text-[20px] font-bold text-[#14532D]">Chọn từ để luyện nói:</span>
+            <span id="pronounce-progress-badge" class="text-[18px] font-display font-bold bg-[#22C55E] text-white px-4 py-1 rounded-xl shadow-[0_3px_0_#15803D]">0/6 từ</span>
           </div>
-          <div id="pronounce-pills" class="grid grid-cols-3 sm:grid-cols-6 gap-3">
-            <!-- Render bằng JS -->
-          </div>
+          <div id="pronounce-pills" class="grid grid-cols-3 sm:grid-cols-6 gap-3"></div>
         </div>
 
-        <!-- Thẻ luyện phát âm khổng lồ -->
-        <div id="pr-main-card" class="bg-white rounded-3xl border-4 border-[#FACC15] shadow-[0_8px_0_#EAB308] p-5 sm:p-8 relative">
-          <!-- Nút Trước / Sau >= 60px -->
+        <div id="pr-main-card" class="bg-white rounded-3xl border-4 border-[#FACC15] shadow-[0_8px_0_#EAB308] p-5 sm:p-8">
           <div class="w-full flex items-center justify-between mb-5 pb-3 border-b-2 border-[#FEF08A]">
-            <button onclick="playPopSound(); prevPronounceWord()" class="btn-lego min-h-[56px] min-w-[56px] px-4 rounded-2xl bg-[#FEF08A] hover:bg-[#FDE047] border-2 border-[#FACC15] shadow-[0_4px_0_#CA8A04] active:shadow-[0_1px_0_#CA8A04] text-[#451A03] font-display font-bold text-[18px]">
-              &larr; Trước
-            </button>
-            <div id="pronounce-stars-display" class="flex items-center gap-2 text-3xl">
-              <span class="opacity-25 text-[#FACC15]">&starf;</span><span class="opacity-25 text-[#FACC15]">&starf;</span><span class="opacity-25 text-[#FACC15]">&starf;</span>
-            </div>
-            <button onclick="playPopSound(); nextPronounceWord()" class="btn-lego min-h-[56px] min-w-[56px] px-4 rounded-2xl bg-[#FEF08A] hover:bg-[#FDE047] border-2 border-[#FACC15] shadow-[0_4px_0_#CA8A04] active:shadow-[0_1px_0_#CA8A04] text-[#451A03] font-display font-bold text-[18px]">
-              Sau &rarr;
-            </button>
+            <button onclick="playPopSound(); prevPronounceWord()" class="btn-lego min-h-[56px] px-4 rounded-2xl bg-[#FEF08A] border-2 border-[#FACC15] shadow-[0_4px_0_#CA8A04] text-[#451A03] font-display font-bold text-[18px]">&larr; Trước</button>
+            <div id="pronounce-stars-display" class="flex items-center gap-2 text-3xl"></div>
+            <button onclick="playPopSound(); nextPronounceWord()" class="btn-lego min-h-[56px] px-4 rounded-2xl bg-[#FEF08A] border-2 border-[#FACC15] shadow-[0_4px_0_#CA8A04] text-[#451A03] font-display font-bold text-[18px]">Sau &rarr;</button>
           </div>
 
           <div id="pr-card-body" class="w-full flex flex-col items-center text-center">
-            <!-- Cột Trái -->
             <div id="pr-left-col" class="flex flex-col items-center">
-              <div id="pr-illustration" onclick="onPronounceIllustrationClick()" class="w-40 h-40 sm:w-48 sm:h-48 flex items-center justify-center cursor-pointer transition-transform hover:scale-105" title="Chạm để nghe">
-                <!-- SVG -->
-              </div>
-              <button onclick="playCurrentPetAnimalSound()" class="btn-lego min-h-[60px] mt-4 py-2.5 px-6 rounded-2xl bg-[#FACC15] hover:bg-[#EAB308] border-2 border-[#EAB308] shadow-[0_6px_0_#CA8A04] active:shadow-[0_2px_0_#CA8A04] text-[#451A03] font-display text-[18px] font-bold flex items-center gap-2.5">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 10c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-4.5 1c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm9 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-4.5 2c-2.33 0-4.31 1.46-5.11 3.5h10.22c-.8-2.04-2.78-3.5-5.11-3.5z"/></svg>
-                <span id="pr-animal-sound-btn">Tiếng kêu</span>
+              <div id="pr-illustration" onclick="onPronounceIllustrationClick()" class="w-40 h-40 sm:w-48 sm:h-48 flex items-center justify-center cursor-pointer transition-transform hover:scale-105"></div>
+              <button onclick="playCurrentPetAnimalSound()" class="btn-lego min-h-[60px] mt-4 py-2.5 px-6 rounded-2xl bg-[#FACC15] border-2 border-[#EAB308] shadow-[0_6px_0_#CA8A04] text-[#451A03] font-display text-[18px] font-bold flex items-center gap-2">
+                <span>🔊</span><span id="pr-animal-sound-btn">Âm thanh</span>
               </button>
             </div>
 
-            <!-- Cột Phải -->
             <div id="pr-right-col" class="w-full flex flex-col items-center mt-5 sm:mt-0">
               <div class="flex items-baseline justify-center gap-3">
                 <h2 id="pr-word" class="font-display font-bold text-4xl sm:text-5xl text-[#FF6B35]">cat</h2>
-                <span id="pr-ipa" class="text-[18px] font-bold text-[#0369A1] bg-[#E0F2FE] px-3 py-1 rounded-xl">/kæt/</span>
+                <span id="pr-ipa" class="ipa-tag text-[18px] font-bold text-[#0369A1] bg-[#E0F2FE] px-3 py-1 rounded-xl">/kæt/</span>
               </div>
               <div class="mt-2 font-display font-bold text-[22px] text-[#14532D] bg-[#DCFCE7] px-5 py-1 rounded-xl">
-                <span id="pr-meaning">Con mèo</span>
+                <span id="pr-meaning">mèo</span>
+              </div>
+              <div onclick="speakSampleSentence()" class="mt-4 bg-[#E0F2FE] hover:bg-[#BAE6FD] border-2 border-[#7DD3FC] rounded-2xl px-4 py-2.5 text-[18px] font-bold text-[#0C4A6E] cursor-pointer flex items-center gap-2">
+                <span>💬</span><span id="pr-sentence">It is a cute cat.</span>
               </div>
 
-              <!-- Câu ví dụ to rõ -->
-              <div onclick="speakSampleSentence()" class="mt-4 bg-[#E0F2FE] hover:bg-[#BAE6FD] border-2 border-[#7DD3FC] rounded-2xl px-4 py-2.5 text-[18px] font-bold text-[#0C4A6E] cursor-pointer flex items-center gap-2.5 transition">
-                <svg class="w-6 h-6 text-[#0284C7] shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-                <span id="pr-sentence">It is a cute cat.</span>
-              </div>
-
-              <!-- Hai nút nghe mẫu to bự -->
               <div class="flex flex-wrap items-center gap-4 mt-4 w-full max-w-[340px] justify-center">
-                <button onclick="playPopSound(); speakPronounceTarget(false)" class="btn-lego min-h-[60px] flex-1 py-2.5 px-4 bg-[#0EA5E9] hover:bg-[#0284C7] border-2 border-[#0284C7] shadow-[0_6px_0_#0369A1] active:shadow-[0_2px_0_#0369A1] text-white font-display font-bold rounded-2xl text-[18px]">
-                  Nghe mẫu
-                </button>
-                <button onclick="playPopSound(); speakPronounceTarget(true)" class="btn-lego min-h-[60px] flex-1 py-2.5 px-4 bg-[#22C55E] hover:bg-[#16A34A] border-2 border-[#16A34A] shadow-[0_6px_0_#15803D] active:shadow-[0_2px_0_#15803D] text-white font-display font-bold rounded-2xl text-[18px]">
-                  Đọc chậm
-                </button>
+                <button onclick="playPopSound(); speakPronounceTarget(false)" class="btn-lego min-h-[60px] flex-1 py-2.5 px-4 bg-[#0EA5E9] border-2 border-[#0284C7] shadow-[0_6px_0_#0369A1] text-white font-display font-bold rounded-2xl text-[18px]">Nghe mẫu</button>
+                <button onclick="playPopSound(); speakPronounceTarget(true)" class="btn-lego min-h-[60px] flex-1 py-2.5 px-4 bg-[#22C55E] border-2 border-[#16A34A] shadow-[0_6px_0_#15803D] text-white font-display font-bold rounded-2xl text-[18px]">Đọc chậm</button>
               </div>
 
-              <!-- Micro Thu Âm Khổng Lồ -->
               <div class="w-full mt-5 pt-5 border-t-2 border-dashed border-[#FDE68A] flex flex-col items-center">
-                <button id="btn-mic" onclick="startPronunciationCheck()" class="btn-lego min-h-[68px] w-full max-w-[300px] py-3.5 px-6 rounded-2xl bg-[#FF6B35] hover:bg-[#F97316] border-2 border-[#EA580C] shadow-[0_7px_0_#C2410C] active:shadow-[0_2px_0_#C2410C] text-white font-display font-bold text-[20px] flex items-center justify-center gap-3">
-                  <svg id="mic-icon-svg" class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3z"/></svg>
-                  <span id="mic-btn-text">Bấm để nói</span>
+                <button id="btn-mic" onclick="startPronunciationCheck()" class="btn-lego min-h-[68px] w-full max-w-[300px] py-3.5 px-6 rounded-2xl bg-[#FF6B35] border-2 border-[#EA580C] shadow-[0_7px_0_#C2410C] text-white font-display font-bold text-[20px] flex items-center justify-center gap-3">
+                  <span id="mic-icon">🎙️</span><span id="mic-btn-text">Bấm để nói</span>
                 </button>
-
                 <div id="mic-wave" class="hidden items-center justify-center gap-2 h-8 mt-3">
                   <span class="eq-bar w-2 bg-[#FF6B35] rounded-full"></span>
                   <span class="eq-bar w-2 bg-[#FACC15] rounded-full"></span>
@@ -369,101 +373,56 @@
                   <span class="eq-bar w-2 bg-[#0EA5E9] rounded-full"></span>
                   <span class="text-[18px] font-bold text-[#FF6B35] ml-2">Đang lắng nghe bé...</span>
                 </div>
-
-                <div id="pr-result-box" class="mt-3 min-h-[44px] flex flex-col items-center justify-center text-center">
-                  <p class="text-[18px] font-bold text-[#475569]">Nhấn nút và đọc thật to nhé!</p>
-                </div>
-
-                <button id="btn-mic-fallback" onclick="simulatePronunciationSuccess()" class="mt-2 text-base font-bold text-[#0284C7] hover:text-[#0369A1] underline transition">
-                  Mô phỏng bé đọc đúng (nếu máy không có Micro)
-                </button>
+                <div id="pr-result-box" class="mt-3 min-h-[44px] flex flex-col items-center justify-center text-center"></div>
+                <button id="btn-mic-fallback" onclick="simulatePronunciationSuccess()" class="mt-2 text-base font-bold text-[#0284C7] underline">Mô phỏng bé đọc đúng</button>
               </div>
             </div>
           </div>
         </div>
-
-        <div class="grid grid-cols-2 gap-4 pt-1">
-          <button onclick="playPopSound(); switchTab('quiz')" class="btn-lego min-h-[60px] bg-[#A855F7] hover:bg-[#9333EA] border-2 border-[#9333EA] shadow-[0_6px_0_#6B21A8] active:shadow-[0_2px_0_#6B21A8] text-white font-display font-bold py-3 px-4 rounded-2xl text-[18px]">
-            Bước 3: Đố vui
-          </button>
-          <button onclick="playPopSound(); switchTab('match')" class="btn-lego min-h-[60px] bg-[#22C55E] hover:bg-[#16A34A] border-2 border-[#16A34A] shadow-[0_6px_0_#15803D] active:shadow-[0_2px_0_#15803D] text-white font-display font-bold py-3 px-4 rounded-2xl text-[18px]">
-            Bước 4: Nối từ &rarr;
-          </button>
-        </div>
       </section>
 
-      <!-- ==================== BƯỚC 3: ĐỐ VUI (QUIZ) ==================== -->
+      <!-- ==================== 3. ĐỐ VUI ==================== -->
       <section id="view-quiz" class="hidden flex-col justify-between space-y-5">
         <div class="flex flex-wrap items-center justify-between gap-4 bg-[#F3E8FF] border-2 border-[#D8B4FE] rounded-3xl p-4 sm:px-6">
           <div class="flex items-center gap-3">
-            <span class="text-[18px] font-extrabold text-[#581C87]">Điểm của bé:</span>
-            <span id="quiz-score" class="font-display font-bold text-[26px] text-[#7E22CE] leading-none">0 điểm</span>
+            <span class="text-[18px] font-extrabold text-[#581C87]">Điểm:</span>
+            <span id="quiz-score" class="font-display font-bold text-[26px] text-[#7E22CE]">0 điểm</span>
           </div>
-
-          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-            <button onclick="playPopSound(); setQuizMode('sound')" id="qmode-sound" class="btn-lego min-h-[56px] px-4 py-2 rounded-2xl font-display text-[17px] font-bold bg-[#A855F7] text-white border-2 border-[#9333EA] shadow-[0_5px_0_#6B21A8]">
-              Tiếng kêu
-            </button>
-            <button onclick="playPopSound(); setQuizMode('listen')" id="qmode-listen" class="btn-lego min-h-[56px] px-4 py-2 rounded-2xl font-display text-[17px] font-bold bg-white text-[#6B21A8] border-2 border-[#D8B4FE] shadow-[0_5px_0_#C084FC]">
-              Nghe từ
-            </button>
-            <button onclick="playPopSound(); setQuizMode('image')" id="qmode-image" class="btn-lego min-h-[56px] px-4 py-2 rounded-2xl font-display text-[17px] font-bold bg-white text-[#6B21A8] border-2 border-[#D8B4FE] shadow-[0_5px_0_#C084FC]">
-              Nhìn hình
-            </button>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="playPopSound(); setQuizMode('sound')" id="qmode-sound" class="btn-lego min-h-[56px] px-4 py-2 rounded-2xl font-display text-[17px] font-bold">Âm thanh</button>
+            <button onclick="playPopSound(); setQuizMode('listen')" id="qmode-listen" class="btn-lego min-h-[56px] px-4 py-2 rounded-2xl font-display text-[17px] font-bold">Nghe từ</button>
+            <button onclick="playPopSound(); setQuizMode('image')" id="qmode-image" class="btn-lego min-h-[56px] px-4 py-2 rounded-2xl font-display text-[17px] font-bold">Nhìn hình</button>
           </div>
         </div>
 
         <div id="quiz-prompt-box" class="bg-white rounded-3xl border-4 border-[#BAE6FD] shadow-[0_6px_0_#7DD3FC] p-6 text-center">
-          <p id="quiz-instruction" class="font-display text-[22px] sm:text-[26px] font-bold text-[#1E1B4B] mb-4">
-            Lắng nghe tiếng kêu và chọn con vật nhé!
-          </p>
-
+          <p id="quiz-instruction" class="font-display text-[22px] sm:text-[26px] font-bold text-[#1E1B4B] mb-4"></p>
           <div id="quiz-audio-prompt" class="flex flex-col items-center py-2">
-            <button onclick="playQuizAudio()" class="btn-lego w-24 h-24 rounded-3xl bg-[#FACC15] hover:bg-[#EAB308] border-2 border-[#EAB308] shadow-[0_8px_0_#CA8A04] active:shadow-[0_2px_0_#CA8A04] text-[#451A03] flex items-center justify-center">
-              <svg class="w-12 h-12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-            </button>
+            <button onclick="playQuizAudio()" class="btn-lego w-24 h-24 rounded-3xl bg-[#FACC15] border-2 border-[#EAB308] shadow-[0_8px_0_#CA8A04] text-[#451A03] flex items-center justify-center text-4xl">🔊</button>
             <span class="text-[18px] font-bold text-[#0369A1] mt-3">Chạm để nghe lại</span>
           </div>
-
           <div id="quiz-image-prompt" class="hidden flex-col items-center">
             <div id="quiz-target-svg" class="w-36 h-36 mx-auto"></div>
-            <p class="text-[18px] font-bold text-[#0369A1] mt-2">Bạn nhỏ này tiếng Anh là gì?</p>
+            <p class="text-[18px] font-bold text-[#0369A1] mt-2">Đây là gì tiếng Anh nhỉ?</p>
           </div>
         </div>
 
         <div id="quiz-feedback" class="min-h-[30px] flex items-center justify-center text-[20px] font-display font-bold"></div>
-
-        <div id="quiz-options" class="grid grid-cols-2 gap-4 sm:gap-5">
-          <!-- Render bằng JS -->
-        </div>
-
-        <div class="pt-2">
-          <button onclick="playPopSound(); switchTab('match')" class="btn-lego min-h-[64px] w-full bg-[#22C55E] hover:bg-[#16A34A] border-2 border-[#16A34A] shadow-[0_6px_0_#15803D] active:shadow-[0_2px_0_#15803D] text-white font-display font-bold py-3.5 px-6 rounded-2xl text-[20px]">
-            Sang Bước 4: Nối từ &rarr;
-          </button>
-        </div>
+        <div id="quiz-options" class="grid grid-cols-2 gap-4 sm:gap-5"></div>
       </section>
 
-      <!-- ==================== BƯỚC 4: NỐI TỪ (MATCHING) ==================== -->
+      <!-- ==================== 4. NỐI TỪ ==================== -->
       <section id="view-match" class="hidden flex-col justify-between space-y-5">
         <div class="flex flex-wrap items-center justify-between gap-4 bg-[#DCFCE7] border-2 border-[#86EFAC] rounded-3xl p-4 sm:px-6">
           <div class="flex items-center gap-3">
             <span class="text-[18px] font-extrabold text-[#14532D]">Đã nối:</span>
-            <span id="match-counter" class="font-display font-bold text-[24px] text-[#15803D] leading-none">0/6 cặp</span>
+            <span id="match-counter" class="font-display font-bold text-[24px] text-[#15803D]">0/6 cặp</span>
           </div>
           <div class="flex items-center gap-3">
-            <button onclick="playPopSound(); toggleMatchHint()" id="btn-match-hint" class="btn-lego min-h-[56px] px-4 py-2 rounded-2xl text-[17px] font-display font-bold bg-[#FEF08A] hover:bg-[#FDE047] border-2 border-[#FACC15] shadow-[0_5px_0_#CA8A04] text-[#451A03]">
-              Gợi ý
-            </button>
-            <button onclick="playPopSound(); initMatchGame()" class="btn-lego min-h-[56px] px-4 py-2 rounded-2xl text-[17px] font-display font-bold bg-[#0EA5E9] hover:bg-[#0284C7] border-2 border-[#0284C7] shadow-[0_5px_0_#0369A1] text-white">
-              Trộn lại
-            </button>
+            <button onclick="playPopSound(); toggleMatchHint()" id="btn-match-hint" class="btn-lego min-h-[56px] px-4 py-2 rounded-2xl text-[17px] font-display font-bold bg-[#FEF08A] border-2 border-[#FACC15] shadow-[0_5px_0_#CA8A04] text-[#451A03]">Gợi ý</button>
+            <button onclick="playPopSound(); initMatchGame()" class="btn-lego min-h-[56px] px-4 py-2 rounded-2xl text-[17px] font-display font-bold bg-[#0EA5E9] border-2 border-[#0284C7] shadow-[0_5px_0_#0369A1] text-white">Trộn lại</button>
           </div>
         </div>
-
-        <p class="text-center text-[18px] font-bold text-[#1E1B4B] bg-[#FEF9C3] border-2 border-[#FDE047] py-2.5 px-4 rounded-2xl">
-          Chạm hoặc kéo từ hình con vật sang từ tiếng Anh đúng nhé!
-        </p>
 
         <div id="match-board" class="relative bg-white rounded-3xl border-4 border-[#BAE6FD] p-4 sm:p-6 shadow-[0_8px_0_#7DD3FC] min-h-[420px] select-none">
           <svg id="match-lines-svg" class="absolute inset-0 w-full h-full pointer-events-none z-10"></svg>
@@ -476,162 +435,232 @@
         <div id="match-complete-card" class="hidden bg-[#DCFCE7] border-4 border-[#22C55E] rounded-3xl p-6 text-center shadow-[0_8px_0_#15803D]">
           <h3 class="font-display font-bold text-[26px] text-[#14532D]">Hoan hô! Bé nối đúng hết 6 cặp rồi!</h3>
           <p id="match-summary-text" class="text-[18px] text-[#166534] mt-1 font-bold"></p>
-          <button onclick="playPopSound(); switchTab('sentence')" class="btn-lego min-h-[64px] mt-4 bg-[#FF6B35] hover:bg-[#F97316] border-2 border-[#EA580C] shadow-[0_6px_0_#C2410C] text-white font-display font-bold py-3 px-8 rounded-2xl text-[20px]">
-            Bước 5: Ghép câu ngay &rarr;
-          </button>
         </div>
       </section>
 
-      <!-- ==================== BƯỚC 5: GHÉP CÂU (SENTENCE BUILDER) ==================== -->
+      <!-- ==================== 5. GHÉP CÂU ==================== -->
       <section id="view-sentence" class="hidden flex-col justify-between space-y-5">
         <div class="flex items-center justify-between bg-[#FFEDD5] border-2 border-[#FDBA74] rounded-3xl p-4 sm:px-6">
-          <span class="font-display text-[20px] font-bold text-[#9A3412]">Thử thách ghép câu</span>
-          <span id="sentence-progress-text" class="font-display font-bold text-[22px] text-[#C2410C] leading-none">Câu 1/6</span>
+          <span class="font-display text-[20px] font-bold text-[#9A3412]">Ghép từ thành câu</span>
+          <span id="sentence-progress-text" class="font-display font-bold text-[22px] text-[#C2410C]">Câu 1/6</span>
         </div>
 
         <div id="sentence-workspace" class="space-y-5">
-          <div class="bg-white rounded-3xl border-4 border-[#FDE047] shadow-[0_8px_0_#EAB308] p-5">
-            <div class="grid grid-cols-2 gap-4 mb-4">
+          <div class="bg-white rounded-3xl border-4 border-[#FDE047] shadow-[0_8px_0_#EAB308] p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="space-y-3 flex-1 w-full">
               <div onclick="speakCurrentDialogue()" class="btn-lego bg-[#FFE4E6] border-2 border-[#FDA4AF] shadow-[0_4px_0_#FB7185] rounded-2xl p-3 text-center cursor-pointer">
-                <p class="font-display font-bold text-[18px] sm:text-[22px] text-[#881337]">What animal is it?</p>
-                <span class="text-base font-bold text-[#BE123C] block mt-0.5">Con vật gì đây?</span>
+                <p id="sentence-question-en" class="font-display font-bold text-[20px] text-[#881337]">What is it?</p>
+                <span id="sentence-question-vi" class="text-base font-bold text-[#BE123C]">Đây là gì nhỉ?</span>
               </div>
               <div onclick="speakSentencePreview()" class="btn-lego bg-[#DCFCE7] border-2 border-[#86EFAC] shadow-[0_4px_0_#22C55E] rounded-2xl p-3 text-center cursor-pointer">
-                <p id="dialogue-answer-bubble" class="font-display font-bold text-[18px] sm:text-[22px] text-[#14532D]">It's a ...</p>
-                <span id="dialogue-answer-sub" class="text-base font-bold text-[#15803D] block mt-0.5">Chạm từ để ghép</span>
+                <p id="dialogue-answer-bubble" class="font-display font-bold text-[20px] text-[#14532D]">It's ...</p>
+                <span id="dialogue-answer-sub" class="text-base font-bold text-[#15803D]">Chạm từ để ghép</span>
               </div>
             </div>
-
-            <div class="flex items-end justify-between gap-4 pt-2">
-              <div class="w-[50%] h-28 flex items-end justify-center">
-                <svg viewBox="0 0 210 115" class="w-full h-full">
-                  <g transform="translate(8, 6)">
-                    <path d="M18 46 C14 16, 72 16, 68 46 L72 72 L12 72 Z" fill="#881337"/>
-                    <ellipse cx="42" cy="48" rx="22" ry="19" fill="#fed7aa"/>
-                    <circle cx="34" cy="48" r="3" fill="#064e3b"/>
-                    <circle cx="51" cy="48" r="3" fill="#064e3b"/>
-                    <ellipse cx="28" cy="53" rx="3.5" ry="2" fill="#fda4af"/>
-                    <ellipse cx="57" cy="53" rx="3.5" ry="2" fill="#fda4af"/>
-                    <path d="M38 56 Q42 61 46 56" fill="none" stroke="#7f1d1d" stroke-width="2" stroke-linecap="round"/>
-                    <path d="M26 68 L58 68 L62 88 L22 88 Z" fill="#38bdf8"/>
-                    <path d="M24 88 L60 88 L64 102 L20 102 Z" fill="#f9a8d4"/>
-                  </g>
-                  <g transform="translate(106, 4)">
-                    <path d="M20 42 C18 14, 74 14, 72 42 C82 36, 86 44, 74 48" fill="#d97706"/>
-                    <ellipse cx="46" cy="50" rx="23" ry="19" fill="#fed7aa"/>
-                    <circle cx="37" cy="49" r="3" fill="#451a03"/>
-                    <circle cx="55" cy="49" r="3" fill="#451a03"/>
-                    <ellipse cx="30" cy="54" rx="3.5" ry="2" fill="#fda4af"/>
-                    <ellipse cx="62" cy="54" rx="3.5" ry="2" fill="#fda4af"/>
-                    <path d="M40 57 Q46 63 52 57" fill="#9f1239"/>
-                    <path d="M28 70 L64 70 L68 92 L24 92 Z" fill="#fde047"/>
-                    <rect x="30" y="67" width="32" height="7" rx="3.5" fill="#0284c7"/>
-                  </g>
-                </svg>
-              </div>
-
-              <div onclick="speakCurrentTargetPet()" class="btn-lego w-[45%] bg-[#FFFBEB] rounded-2xl border-4 border-[#FF6B35] shadow-[0_5px_0_#EA580C] p-3 flex flex-col items-center justify-center cursor-pointer">
-                <div id="sentence-pet-svg" class="w-24 h-24 sm:w-28 sm:h-28"></div>
-                <span id="sentence-pet-hint" class="font-display text-[18px] font-bold text-[#9A3412] mt-1">con mèo</span>
-              </div>
+            <div onclick="speakCurrentTargetPet()" class="btn-lego w-full sm:w-44 bg-[#FFFBEB] rounded-2xl border-4 border-[#FF6B35] shadow-[0_5px_0_#EA580C] p-3 flex flex-col items-center justify-center cursor-pointer">
+              <div id="sentence-pet-svg" class="w-28 h-28"></div>
+              <span id="sentence-pet-hint" class="font-display text-[18px] font-bold text-[#9A3412] mt-1"></span>
             </div>
           </div>
 
           <div class="bg-white rounded-3xl border-2 border-[#BAE6FD] p-4 shadow-[0_5px_0_#7DD3FC]">
             <div class="flex items-center justify-between mb-3">
               <span class="text-[18px] font-bold text-[#0369A1]">Câu của bé:</span>
-              <button onclick="playPopSound(); clearSentenceSlots()" class="btn-lego min-h-[44px] px-4 py-1 rounded-xl bg-[#FFE4E6] border-2 border-[#FDA4AF] shadow-[0_3px_0_#FB7185] text-[16px] font-display font-bold text-[#BE123C]">
-                Xếp lại
-              </button>
+              <button onclick="playPopSound(); clearSentenceSlots()" class="btn-lego min-h-[44px] px-4 py-1 rounded-xl bg-[#FFE4E6] border-2 border-[#FDA4AF] shadow-[0_3px_0_#FB7185] text-[16px] font-display font-bold text-[#BE123C]">Xếp lại</button>
             </div>
             <div id="sentence-slots" class="grid grid-cols-3 gap-3 sm:gap-4 min-h-[64px]"></div>
           </div>
 
           <div id="sentence-word-bank" class="flex flex-wrap items-center justify-center gap-4 pt-1"></div>
-
           <div id="sentence-feedback" class="min-h-[28px] text-center text-[20px] font-display font-bold"></div>
 
           <div class="flex items-center gap-4">
-            <button id="btn-check-sentence" onclick="checkBuiltSentence()" class="btn-lego min-h-[64px] flex-1 bg-[#22C55E] hover:bg-[#16A34A] border-2 border-[#16A34A] shadow-[0_6px_0_#15803D] active:shadow-[0_2px_0_#15803D] text-white font-display font-bold py-3.5 px-6 rounded-2xl text-[20px]">
-              Kiểm tra câu
+            <button id="btn-check-sentence" onclick="checkBuiltSentence()" class="btn-lego min-h-[64px] flex-1 bg-[#22C55E] border-2 border-[#16A34A] shadow-[0_6px_0_#15803D] text-white font-display font-bold py-3.5 px-6 rounded-2xl text-[20px]">Kiểm tra câu</button>
+            <button id="btn-next-sentence" onclick="playPopSound(); nextSentenceChallenge()" class="hidden btn-lego min-h-[64px] flex-1 bg-[#FF6B35] border-2 border-[#EA580C] shadow-[0_6px_0_#C2410C] text-white font-display font-bold py-3.5 px-6 rounded-2xl text-[20px]">Câu tiếp theo &rarr;</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== GAME 1: LẬT THẺ TRÍ NHỚ (MEMORY FLIP) ==================== -->
+      <section id="view-memory" class="hidden flex-col space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-4 bg-[#E0F2FE] border-2 border-[#7DD3FC] rounded-3xl p-4 sm:px-6">
+          <div>
+            <h2 class="font-display text-[24px] font-bold text-[#0C4A6E]">Lật Thẻ Trí Nhớ</h2>
+            <p id="memory-stats" class="text-[18px] font-bold text-[#0369A1]">Đã tìm: 0 cặp • Số lượt: 0</p>
+          </div>
+          <button onclick="playPopSound(); initMemoryGame()" class="btn-lego min-h-[56px] px-5 py-2 rounded-2xl bg-[#FF6B35] border-2 border-[#EA580C] shadow-[0_5px_0_#C2410C] text-white font-display text-[18px] font-bold">
+            Chơi lại
+          </button>
+        </div>
+
+        <div id="memory-grid" class="grid grid-cols-3 gap-3 sm:gap-5"></div>
+      </section>
+
+      <!-- ==================== GAME 2: CHẠM BONG BÓNG (BUBBLE POP) ==================== -->
+      <section id="view-bubble" class="hidden flex-col space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-4 bg-[#FCE7F3] border-2 border-[#F9A8D4] rounded-3xl p-4 sm:px-6">
+          <div>
+            <h2 class="font-display text-[24px] font-bold text-[#831843]">Chạm Bong Bóng Bay</h2>
+            <p id="bubble-score" class="text-[18px] font-bold text-[#9D174D]">Điểm bong bóng: 0</p>
+          </div>
+          <button onclick="playPopSound(); speakBubbleTarget()" class="btn-lego min-h-[56px] px-5 py-2 rounded-2xl bg-[#EC4899] border-2 border-[#DB2777] shadow-[0_5px_0_#9D174D] text-white font-display text-[18px] font-bold flex items-center gap-2">
+            <span>🔊</span><span id="bubble-target-label">Tìm: cat</span>
+          </button>
+        </div>
+
+        <div id="bubble-arena" class="relative bg-gradient-to-b from-[#E0F2FE] to-[#F0FDF4] border-4 border-[#38BDF8] rounded-3xl p-5 min-h-[420px] shadow-[0_8px_0_#0284C7] flex flex-wrap items-center justify-center gap-5 sm:gap-8 overflow-hidden">
+          <!-- Render floating bubbles -->
+        </div>
+      </section>
+
+      <!-- ==================== GAME 3: CHO THÚ CƯNG ĂN (FEED THE PET) ==================== -->
+      <section id="view-feed" class="hidden flex-col space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-4 bg-[#FEF9C3] border-2 border-[#FDE047] rounded-3xl p-4 sm:px-6">
+          <div>
+            <h2 class="font-display text-[24px] font-bold text-[#854D0E]">Cho Thú Cưng Ăn</h2>
+            <p id="feed-score" class="text-[18px] font-bold text-[#A16207]">Đã cho ăn: 0 bạn nhỏ</p>
+          </div>
+          <button onclick="playPopSound(); initFeedGame()" class="btn-lego min-h-[56px] px-5 py-2 rounded-2xl bg-[#22C55E] border-2 border-[#16A34A] shadow-[0_5px_0_#15803D] text-white font-display text-[18px] font-bold">
+            Đổi bạn khác
+          </button>
+        </div>
+
+        <div class="bg-white rounded-3xl border-4 border-[#FACC15] shadow-[0_8px_0_#CA8A04] p-6 text-center space-y-5">
+          <div id="feed-pet-speech" class="inline-block bg-[#FFEDD5] border-2 border-[#FDBA74] px-6 py-2.5 rounded-2xl font-display text-[22px] font-bold text-[#9A3412]">
+            Meow! Tớ đói bụng quá, cho tớ ăn nhé!
+          </div>
+          <div id="feed-pet-svg" class="w-44 h-44 mx-auto transition-transform"></div>
+          <div id="feed-feedback" class="min-h-[28px] font-display text-[20px] font-bold"></div>
+          <div id="feed-food-options" class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2"></div>
+        </div>
+      </section>
+
+      <!-- ==================== GAME 4: XẾP KHỐI ĐÁNH VẦN (LEGO SPELLING) ==================== -->
+      <section id="view-spelling" class="hidden flex-col space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-4 bg-[#FFEDD5] border-2 border-[#FDBA74] rounded-3xl p-4 sm:px-6">
+          <div>
+            <h2 class="font-display text-[24px] font-bold text-[#9A3412]">Xếp Khối Đánh Vần</h2>
+            <p id="spelling-progress" class="text-[18px] font-bold text-[#C2410C]">Từ 1/6</p>
+          </div>
+          <button onclick="playPopSound(); speakSpellingTarget()" class="btn-lego min-h-[56px] px-5 py-2 rounded-2xl bg-[#0EA5E9] border-2 border-[#0284C7] shadow-[0_5px_0_#0369A1] text-white font-display text-[18px] font-bold">
+            🔊 Nghe lại từ
+          </button>
+        </div>
+
+        <div id="spelling-workspace" class="bg-white rounded-3xl border-4 border-[#BAE6FD] shadow-[0_8px_0_#7DD3FC] p-6 text-center space-y-6">
+          <div class="flex flex-col items-center">
+            <div id="spelling-svg" class="w-36 h-36 cursor-pointer" onclick="speakSpellingTarget()"></div>
+            <span id="spelling-meaning" class="mt-2 font-display text-[22px] font-bold text-[#14532D] bg-[#DCFCE7] px-5 py-1 rounded-2xl">Con mèo</span>
+          </div>
+
+          <!-- Ô chữ cái ghép vần -->
+          <div id="spelling-slots" class="flex flex-wrap items-center justify-center gap-3"></div>
+
+          <!-- Các khối chữ cái Lego -->
+          <div id="spelling-bank" class="flex flex-wrap items-center justify-center gap-3 pt-2"></div>
+
+          <div id="spelling-feedback" class="min-h-[28px] font-display text-[20px] font-bold"></div>
+
+          <div class="flex items-center justify-center gap-4">
+            <button onclick="playPopSound(); clearSpellingSlots()" class="btn-lego min-h-[56px] px-6 py-2 rounded-2xl bg-[#FFE4E6] border-2 border-[#FDA4AF] shadow-[0_5px_0_#FB7185] font-display text-[18px] font-bold text-[#BE123C]">
+              Xếp lại
             </button>
-            <button id="btn-next-sentence" onclick="playPopSound(); nextSentenceChallenge()" class="hidden btn-lego min-h-[64px] flex-1 bg-[#FF6B35] hover:bg-[#F97316] border-2 border-[#EA580C] shadow-[0_6px_0_#C2410C] active:shadow-[0_2px_0_#C2410C] text-white font-display font-bold py-3.5 px-6 rounded-2xl text-[20px]">
-              Câu tiếp theo &rarr;
+            <button id="btn-next-spelling" onclick="playPopSound(); nextSpellingWord()" class="hidden btn-lego min-h-[56px] px-6 py-2 rounded-2xl bg-[#22C55E] border-2 border-[#16A34A] shadow-[0_5px_0_#15803D] font-display text-[18px] font-bold text-white">
+              Từ tiếp theo &rarr;
             </button>
           </div>
         </div>
       </section>
 
+      <!-- ==================== NHÀ THÚ CƯNG & BỘ SƯU TẬP HUY HIỆU ==================== -->
+      <section id="view-pethouse" class="hidden flex-col space-y-6">
+        <div class="bg-gradient-to-r from-[#DCFCE7] to-[#FEF9C3] border-4 border-[#22C55E] rounded-3xl p-5 sm:p-6 shadow-[0_6px_0_#16A34A] flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="font-display text-[26px] sm:text-[30px] font-bold text-[#14532D]">🏡 Ngôi Nhà Thú Cưng Của Bé</h2>
+            <p class="text-[18px] font-bold text-[#166534]">Học thuộc từ vựng để mở khóa các bạn thú cưng về nhà chơi nhé!</p>
+          </div>
+          <div id="pethouse-badge-count" class="bg-white border-2 border-[#22C55E] px-5 py-2 rounded-2xl font-display text-[22px] font-bold text-[#15803D]">
+            1/6 Bạn nhỏ
+          </div>
+        </div>
+
+        <div id="pethouse-garden" class="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6"></div>
+
+        <div class="bg-white rounded-3xl border-4 border-[#FACC15] p-5 shadow-[0_6px_0_#CA8A04]">
+          <h3 class="font-display text-[22px] font-bold text-[#854D0E] mb-4">🏆 Huy Hiệu 5 Chủ Đề Vàng</h3>
+          <div id="pethouse-trophies" class="grid grid-cols-2 sm:grid-cols-5 gap-3"></div>
+        </div>
+      </section>
+
     </main>
 
-    <!-- FOOTER VUI TƯƠI -->
     <footer class="py-4 px-6 bg-[#F0F9FF] border-t-4 border-[#BAE6FD] flex items-center justify-between text-[16px] font-bold text-[#0369A1]">
-      <span class="font-display">TOPO Kids English</span>
-      <button onclick="resetProgress()" class="btn-lego px-4 py-1.5 rounded-xl bg-white border-2 border-[#BAE6FD] shadow-[0_3px_0_#7DD3FC] text-[15px] text-[#0284C7] hover:text-[#DC2626] font-display font-bold">
-        Đặt lại tiến độ
+      <span class="font-display">TOPO Kids English • 5 Chủ đề & 4 Trò chơi</span>
+      <button onclick="playPopSound(); resetProgress()" class="btn-lego px-4 py-1.5 rounded-xl bg-white border-2 border-[#BAE6FD] shadow-[0_3px_0_#7DD3FC] text-[15px] text-[#0284C7] hover:text-[#DC2626] font-display font-bold">
+        Đặt lại
       </button>
     </footer>
   </div>
 
-  <!-- Toast Thông Báo Vui Nhộn -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#1E1B4B] text-[#FEF08A] font-display text-[18px] font-bold px-6 py-3 rounded-2xl shadow-xl opacity-0 pointer-events-none transition-opacity duration-200 z-50">
     Thông báo
   </div>
 
   <script>
 
-    // Âm thanh "Pop!" vui nhộn mỗi khi bé chạm nút (Audio Readiness)
-    function playPopSound() {
-      try {
-        const ctx = getAudioCtx();
-        if (!ctx) return;
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(520, now);
-        osc.frequency.exponentialRampToValueAtTime(880, now + 0.06);
-        gain.gain.setValueAtTime(0.22, now);
-        gain.gain.exponentialRampToValueAtTime(0.005, now + 0.07);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.075);
-      } catch (e) {}
+    // =========================================================================
+    // 1. CHƯƠNG TRÌNH HỌC 5 CHỦ ĐỀ VÀNG (30 TỪ VỰNG CHUẨN MẦM NON - TIỂU HỌC)
+    // =========================================================================
+    function makeColorSvg(hex, stroke, name) {
+      return `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
+        <path d="M80 18 C115 48, 136 82, 130 112 C124 140, 102 146, 80 146 C58 146, 36 140, 30 112 C24 82, 45 48, 80 18 Z" fill="${hex}" stroke="${stroke}" stroke-width="4"/>
+        <ellipse cx="64" cy="92" rx="6" ry="7.5" fill="#1E1B4B"/><circle cx="62" cy="89" r="2.2" fill="#FFF"/>
+        <ellipse cx="96" cy="92" rx="6" ry="7.5" fill="#1E1B4B"/><circle cx="94" cy="89" r="2.2" fill="#FFF"/>
+        <ellipse cx="52" cy="103" rx="6" ry="3.5" fill="#FDA4AF" opacity="0.8"/>
+        <ellipse cx="108" cy="103" rx="6" ry="3.5" fill="#FDA4AF" opacity="0.8"/>
+        <path d="M68 110 Q80 122 92 110" fill="none" stroke="#1E1B4B" stroke-width="3.5" stroke-linecap="round"/>
+      </svg>`;
     }
 
-    // Hiệu ứng hạt sao/tim bay lên khi bé chạm vào con vật
-    function spawnKidParticles(x, y) {
-      const icons = ['⭐', '🌟', '💛', '✨'];
-      for (let i = 0; i < 4; i++) {
-        const el = document.createElement('span');
-        el.className = 'kid-particle text-2xl';
-        el.textContent = icons[i % icons.length];
-        el.style.left = `${x + (Math.random() * 60 - 30)}px`;
-        el.style.top = `${y + (Math.random() * 40 - 20)}px`;
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), 750);
+    function makeNumberSvg(num, bg, stroke) {
+      let dots = '';
+      for (let i = 0; i < num; i++) {
+        const x = 28 + (i % 3) * 52;
+        const y = num <= 3 ? 132 : (i < 3 ? 122 : 140);
+        dots += `<circle cx="${x}" cy="${y}" r="7" fill="#FACC15" stroke="#854D0E" stroke-width="2"/>`;
       }
+      return `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
+        <rect x="20" y="14" width="120" height="96" rx="28" fill="${bg}" stroke="${stroke}" stroke-width="4"/>
+        <text x="80" y="84" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="72" fill="#FFFFFF" stroke="${stroke}" stroke-width="2">${num}</text>
+        ${dots}
+      </svg>`;
     }
 
+    const FOOD_SVGS = {
+      apple: `<svg viewBox="0 0 160 160" class="w-full h-full"><path d="M80 42 C68 20, 96 14, 90 42" fill="#22C55E" stroke="#14532D" stroke-width="3"/><path d="M80 45 C42 38, 26 74, 38 110 C48 138, 70 144, 80 136 C90 144, 112 138, 122 110 C134 74, 118 38, 80 45 Z" fill="#EF4444" stroke="#7F1D1D" stroke-width="4"/><circle cx="64" cy="88" r="5.5" fill="#1E1B4B"/><circle cx="96" cy="88" r="5.5" fill="#1E1B4B"/><path d="M70 104 Q80 114 90 104" fill="none" stroke="#1E1B4B" stroke-width="3.5" stroke-linecap="round"/></svg>`,
+      banana: `<svg viewBox="0 0 160 160" class="w-full h-full"><path d="M36 114 C48 138, 112 134, 128 64 C132 46, 122 30, 114 34 C112 68, 76 106, 36 100 C28 100, 30 108, 36 114 Z" fill="#FACC15" stroke="#854D0E" stroke-width="4"/><circle cx="88" cy="88" r="5" fill="#1E1B4B"/><circle cx="106" cy="76" r="5" fill="#1E1B4B"/><path d="M92 98 Q102 104 110 92" fill="none" stroke="#1E1B4B" stroke-width="3" stroke-linecap="round"/></svg>`,
+      carrot: `<svg viewBox="0 0 160 160" class="w-full h-full"><path d="M80 42 C68 18, 56 26, 74 44 M80 42 C80 14, 92 14, 84 44 M84 44 C102 22, 110 34, 88 46" fill="#22C55E" stroke="#14532D" stroke-width="3.5" stroke-linecap="round"/><path d="M54 52 C54 40, 106 40, 106 52 L85 140 C82 146, 78 146, 75 140 Z" fill="#F97316" stroke="#7C2D12" stroke-width="4"/><circle cx="70" cy="72" r="4.5" fill="#1E1B4B"/><circle cx="90" cy="72" r="4.5" fill="#1E1B4B"/><path d="M74 84 Q80 90 86 84" fill="none" stroke="#1E1B4B" stroke-width="3" stroke-linecap="round"/></svg>`,
+      milk: `<svg viewBox="0 0 160 160" class="w-full h-full"><rect x="44" y="48" width="72" height="94" rx="14" fill="#FFFFFF" stroke="#0284C7" stroke-width="4"/><path d="M44 48 L60 24 L100 24 L116 48 Z" fill="#38BDF8" stroke="#0284C7" stroke-width="4" stroke-linejoin="round"/><rect x="44" y="88" width="72" height="24" fill="#BAE6FD"/><circle cx="66" cy="74" r="5" fill="#1E1B4B"/><circle cx="94" cy="74" r="5" fill="#1E1B4B"/><path d="M74 82 Q80 88 86 82" fill="none" stroke="#1E1B4B" stroke-width="3" stroke-linecap="round"/></svg>`,
+      cake: `<svg viewBox="0 0 160 160" class="w-full h-full"><rect x="30" y="76" width="100" height="58" rx="16" fill="#FDE68A" stroke="#B45309" stroke-width="4"/><path d="M30 76 C30 62, 130 62, 130 76 C120 90, 105 78, 95 88 C85 96, 75 80, 65 88 C55 96, 40 82, 30 76 Z" fill="#FB7185" stroke="#BE123C" stroke-width="3.5"/><circle cx="80" cy="48" r="12" fill="#EF4444" stroke="#7F1D1D" stroke-width="3"/><circle cx="64" cy="108" r="4.5" fill="#1E1B4B"/><circle cx="96" cy="108" r="4.5" fill="#1E1B4B"/><path d="M74 116 Q80 122 86 116" fill="none" stroke="#1E1B4B" stroke-width="3" stroke-linecap="round"/></svg>`,
+      bone: `<svg viewBox="0 0 160 160" class="w-full h-full"><path d="M44 64 C28 54, 20 74, 34 82 C20 90, 28 110, 44 100 L116 100 C132 110, 140 90, 126 82 C140 74, 132 54, 116 64 Z" fill="#FFFBEB" stroke="#92400E" stroke-width="4" stroke-linejoin="round"/><circle cx="68" cy="80" r="4" fill="#1E1B4B"/><circle cx="92" cy="80" r="4" fill="#1E1B4B"/><path d="M75 88 Q80 93 85 88" fill="none" stroke="#1E1B4B" stroke-width="2.5" stroke-linecap="round"/></svg>`
+    };
 
-    // =========================================================================
-    // 1. DỮ LIỆU 6 TỪ VỰNG CHỦ ĐỀ ĐỘNG VẬT NUÔI (CHÍNH XÁC TỪ HÌNH ẢNH MẪU)
-    // =========================================================================
-    const PETS_DATA = [
+    function makeActionSvg(emoji, bg, stroke) {
+      return `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
+        <circle cx="80" cy="80" r="64" fill="${bg}" stroke="${stroke}" stroke-width="5"/>
+        <text x="80" y="102" text-anchor="middle" font-size="68">${emoji}</text>
+      </svg>`;
+    }
+
+    const TOPICS_DATA = [
       {
-        id: 'cat',
-        word: 'cat',
-        ipa: '/kæt/',
-        meaning: 'mèo', soundLabel: 'Meo meo~', soundIntro: 'Mèo kêu meo meo',
-        sentence: 'It is a cute cat.',
-        lineColor: '#f97316',
-        color: '#f97316',
-        bgSoft: 'bg-orange-50',
-        borderSoft: 'border-orange-200',
-        // Minh họa chú mèo cam ngồi dễ thương kèm bong bóng trái tim giống ảnh
-        svg: `
-          <svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
+        id: 'pets',
+        titleVi: 'Động Vật Nuôi',
+        titleEn: 'Pets',
+        icon: '🐾',
+        color: '#FF6B35',
+        items: [
+          { id: 'cat', word: 'cat', ipa: '/kæt/', meaning: 'mèo', soundLabel: 'Meo meo', sentence: 'It is a cute cat.', qEn: 'What animal is it?', qVi: 'Con vật gì đây?', aTemplate: ["It's", 'a', 'cat'], lineColor: '#f97316', svg: `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
             <!-- Bong bóng tim nhỏ bên phải nhịp đập -->
             <g class="heart-pop" transform="translate(122, 34)">
               <circle cx="12" cy="12" r="11" fill="#ffffff" stroke="#312e81" stroke-width="2.5"/>
@@ -672,22 +701,8 @@
             <circle cx="49" cy="139" r="3" fill="#f9a8d4"/>
             <ellipse cx="111" cy="138" rx="11" ry="8" fill="#fffbeb" stroke="#312e81" stroke-width="3"/>
             <circle cx="111" cy="139" r="3" fill="#f9a8d4"/>
-          </svg>
-        `
-      },
-      {
-        id: 'dog',
-        word: 'dog',
-        ipa: '/dɒɡ/',
-        meaning: 'chó', soundLabel: 'Gâu gâu!', soundIntro: 'Cún sủa gâu gâu',
-        sentence: 'The dog is very happy.',
-        lineColor: '#eab308',
-        color: '#eab308',
-        bgSoft: 'bg-amber-50',
-        borderSoft: 'border-amber-200',
-        // Minh họa chú chó Shiba vàng đeo vòng cổ xanh + chuông vàng giống ảnh
-        svg: `
-          <svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
+          </svg>` },
+          { id: 'dog', word: 'dog', ipa: '/dɒɡ/', meaning: 'chó', soundLabel: 'Gâu gâu', sentence: 'The dog is happy.', qEn: 'What animal is it?', qVi: 'Con vật gì đây?', aTemplate: ["It's", 'a', 'dog'], lineColor: '#eab308', svg: `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
             <!-- Đuôi cuộn tròn bên phải vẫy mừng -->
             <path class="tail-wag" d="M104 124 C122 124, 126 105, 112 102 C104 100, 101 110, 108 113" fill="#f59e0b" stroke="#451a03" stroke-width="3.5" stroke-linecap="round"/>
             <!-- Thân chó Shiba -->
@@ -724,22 +739,8 @@
             <!-- Chân trước -->
             <rect x="64" y="114" width="12" height="29" rx="6" fill="#fef3c7" stroke="#451a03" stroke-width="3"/>
             <rect x="84" y="114" width="12" height="29" rx="6" fill="#fef3c7" stroke="#451a03" stroke-width="3"/>
-          </svg>
-        `
-      },
-      {
-        id: 'rabbit',
-        word: 'rabbit',
-        ipa: '/ˈræbɪt/',
-        meaning: 'thỏ', soundLabel: 'Chíp chíp~', soundIntro: 'Thỏ ăn cà rốt',
-        sentence: 'The white rabbit likes carrots.',
-        lineColor: '#ec4899',
-        color: '#ec4899',
-        bgSoft: 'bg-pink-50',
-        borderSoft: 'border-pink-200',
-        // Minh họa chú thỏ trắng tai dài ôm củ cà rốt cam giống ảnh
-        svg: `
-          <svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
+          </svg>` },
+          { id: 'rabbit', word: 'rabbit', ipa: '/ˈræbɪt/', meaning: 'thỏ', soundLabel: 'Chíp chíp', sentence: 'The rabbit likes carrots.', qEn: 'What animal is it?', qVi: 'Con vật gì đây?', aTemplate: ["It's", 'a', 'rabbit'], lineColor: '#ec4899', svg: `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
             <!-- Bong bóng tim nhỏ -->
             <g transform="translate(116, 46)">
               <circle cx="11" cy="11" r="10" fill="#ffffff" stroke="#312e81" stroke-width="2.3"/>
@@ -784,22 +785,8 @@
             <!-- Hai tay thỏ ôm cà rốt -->
             <ellipse cx="67" cy="112" rx="9" ry="6" transform="rotate(-15 67 112)" fill="#ffffff" stroke="#312e81" stroke-width="3"/>
             <ellipse cx="101" cy="116" rx="9" ry="6" transform="rotate(20 101 116)" fill="#ffffff" stroke="#312e81" stroke-width="3"/>
-          </svg>
-        `
-      },
-      {
-        id: 'hamster',
-        word: 'hamster',
-        ipa: '/ˈhæmstər/',
-        meaning: 'chuột hamster', soundLabel: 'Chít chít!', soundIntro: 'Hamster chít chít',
-        sentence: 'Look at the chubby hamster!',
-        lineColor: '#d97706',
-        color: '#d97706',
-        bgSoft: 'bg-yellow-50',
-        borderSoft: 'border-yellow-200',
-        // Minh họa chuột hamster mập ú má phúng phính cười tít mắt giống ảnh
-        svg: `
-          <svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
+          </svg>` },
+          { id: 'hamster', word: 'hamster', ipa: '/ˈhæmstər/', meaning: 'chuột hamster', soundLabel: 'Chít chít', sentence: 'Look at the hamster!', qEn: 'What animal is it?', qVi: 'Con vật gì đây?', aTemplate: ["It's", 'a', 'hamster'], lineColor: '#d97706', svg: `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
             <!-- Tai tròn nhỏ -->
             <circle cx="48" cy="38" r="12" fill="#f59e0b" stroke="#451a03" stroke-width="3.5"/>
             <circle cx="48" cy="38" r="6" fill="#fbcfe8"/>
@@ -825,22 +812,8 @@
             <!-- Hai bàn chân nhỏ -->
             <ellipse cx="56" cy="142" rx="12" ry="5.5" fill="#fbbf24" stroke="#451a03" stroke-width="3"/>
             <ellipse cx="104" cy="142" rx="12" ry="5.5" fill="#fbbf24" stroke="#451a03" stroke-width="3"/>
-          </svg>
-        `
-      },
-      {
-        id: 'bird',
-        word: 'bird',
-        ipa: '/bɜːd/',
-        meaning: 'chim', soundLabel: 'Hót líu lo~', soundIntro: 'Chim hót líu lo',
-        sentence: 'A blue bird can fly high.',
-        lineColor: '#0ea5e9',
-        color: '#0ea5e9',
-        bgSoft: 'bg-sky-50',
-        borderSoft: 'border-sky-200',
-        // Minh họa chú chim xanh đậu trên cành cây có lá xanh giống ảnh
-        svg: `
-          <svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
+          </svg>` },
+          { id: 'bird', word: 'bird', ipa: '/bɜːd/', meaning: 'chim', soundLabel: 'Líu lo', sentence: 'A blue bird can fly.', qEn: 'What animal is it?', qVi: 'Con vật gì đây?', aTemplate: ["It's", 'a', 'bird'], lineColor: '#0ea5e9', svg: `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
             <!-- Bong bóng tim -->
             <g transform="translate(114, 34)">
               <circle cx="11" cy="11" r="10" fill="#ffffff" stroke="#1e3a8a" stroke-width="2.3"/>
@@ -870,22 +843,8 @@
             <path d="M104 66 L120 71 L104 77 Z" fill="#fb923c" stroke="#1e3a8a" stroke-width="2.8" stroke-linejoin="round"/>
             <!-- Chân bám cành -->
             <path d="M74 114 L74 125 M88 114 L88 124" stroke="#f97316" stroke-width="3.5" stroke-linecap="round"/>
-          </svg>
-        `
-      },
-      {
-        id: 'fish',
-        word: 'fish',
-        ipa: '/fɪʃ/',
-        meaning: 'cá', soundLabel: 'Bong bóng~', soundIntro: 'Cá thở bong bóng',
-        sentence: 'The little fish swims in water.',
-        lineColor: '#06b6d4',
-        color: '#f97316',
-        bgSoft: 'bg-cyan-50',
-        borderSoft: 'border-cyan-200',
-        // Minh họa chú cá vàng cam trắng (cá hề / cá vàng) kèm bong bóng nước xanh giống ảnh
-        svg: `
-          <svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
+          </svg>` },
+          { id: 'fish', word: 'fish', ipa: '/fɪʃ/', meaning: 'cá', soundLabel: 'Bong bóng', sentence: 'The fish swims fast.', qEn: 'What animal is it?', qVi: 'Con vật gì đây?', aTemplate: ["It's", 'a', 'fish'], lineColor: '#06b6d4', svg: `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-sm">
             <!-- Bong bóng nước xanh nổi bập bồng -->
             <g class="bubble-float">
               <circle cx="38" cy="54" r="7" fill="#38bdf8" stroke="#0284c7" stroke-width="2"/>
@@ -910,221 +869,453 @@
             <circle cx="52.5" cy="74" r="2.2" fill="#ffffff"/>
             <ellipse cx="46" cy="85" rx="4" ry="2.5" fill="#fda4af"/>
             <path d="M38 83 Q42 87 45 84" fill="none" stroke="#431407" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-        `
+          </svg>` }
+        ]
+      },
+      {
+        id: 'colors',
+        titleVi: 'Màu Sắc',
+        titleEn: 'Colors',
+        icon: '🎨',
+        color: '#EC4899',
+        items: [
+          { id: 'red', word: 'red', ipa: '/red/', meaning: 'màu đỏ', soundLabel: 'Âm thanh', sentence: 'It is a red apple.', qEn: 'What color is it?', qVi: 'Đây là màu gì?', aTemplate: ["It", 'is', 'red'], lineColor: '#ef4444', svg: makeColorSvg('#EF4444', '#991B1B') },
+          { id: 'blue', word: 'blue', ipa: '/bluː/', meaning: 'xanh dương', soundLabel: 'Âm thanh', sentence: 'The sky is blue.', qEn: 'What color is it?', qVi: 'Đây là màu gì?', aTemplate: ["It", 'is', 'blue'], lineColor: '#0ea5e9', svg: makeColorSvg('#0EA5E9', '#075985') },
+          { id: 'yellow', word: 'yellow', ipa: '/ˈjeləʊ/', meaning: 'màu vàng', soundLabel: 'Âm thanh', sentence: 'I see a yellow star.', qEn: 'What color is it?', qVi: 'Đây là màu gì?', aTemplate: ["It", 'is', 'yellow'], lineColor: '#eab308', svg: makeColorSvg('#FACC15', '#854D0E') },
+          { id: 'green', word: 'green', ipa: '/ɡriːn/', meaning: 'xanh lá', soundLabel: 'Âm thanh', sentence: 'The leaf is green.', qEn: 'What color is it?', qVi: 'Đây là màu gì?', aTemplate: ["It", 'is', 'green'], lineColor: '#22c55e', svg: makeColorSvg('#22C55E', '#14532D') },
+          { id: 'orange', word: 'orange', ipa: '/ˈɒrɪndʒ/', meaning: 'màu cam', soundLabel: 'Âm thanh', sentence: 'I like orange color.', qEn: 'What color is it?', qVi: 'Đây là màu gì?', aTemplate: ["It", 'is', 'orange'], lineColor: '#f97316', svg: makeColorSvg('#F97316', '#9A3412') },
+          { id: 'purple', word: 'purple', ipa: '/ˈpɜːpl/', meaning: 'màu tím', soundLabel: 'Âm thanh', sentence: 'A cute purple balloon.', qEn: 'What color is it?', qVi: 'Đây là màu gì?', aTemplate: ["It", 'is', 'purple'], lineColor: '#a855f7', svg: makeColorSvg('#A855F7', '#581C87') }
+        ]
+      },
+      {
+        id: 'numbers',
+        titleVi: 'Số Đếm 1-6',
+        titleEn: 'Numbers',
+        icon: '🔢',
+        color: '#0EA5E9',
+        items: [
+          { id: 'one', word: 'one', ipa: '/wʌn/', meaning: 'số một', soundLabel: 'Đếm 1', sentence: 'I have one cat.', qEn: 'What number is it?', qVi: 'Đây là số mấy?', aTemplate: ["Number", 'one', '!'], lineColor: '#ef4444', svg: makeNumberSvg(1, '#FB7185', '#9F1239') },
+          { id: 'two', word: 'two', ipa: '/tuː/', meaning: 'số hai', soundLabel: 'Đếm 2', sentence: 'Two cute dogs.', qEn: 'What number is it?', qVi: 'Đây là số mấy?', aTemplate: ["Number", 'two', '!'], lineColor: '#f97316', svg: makeNumberSvg(2, '#FB923C', '#9A3412') },
+          { id: 'three', word: 'three', ipa: '/θriː/', meaning: 'số ba', soundLabel: 'Đếm 3', sentence: 'Three little birds.', qEn: 'What number is it?', qVi: 'Đây là số mấy?', aTemplate: ["Number", 'three', '!'], lineColor: '#eab308', svg: makeNumberSvg(3, '#FACC15', '#854D0E') },
+          { id: 'four', word: 'four', ipa: '/fɔːr/', meaning: 'số bốn', soundLabel: 'Đếm 4', sentence: 'Four white rabbits.', qEn: 'What number is it?', qVi: 'Đây là số mấy?', aTemplate: ["Number", 'four', '!'], lineColor: '#22c55e', svg: makeNumberSvg(4, '#4ADE80', '#14532D') },
+          { id: 'five', word: 'five', ipa: '/faɪv/', meaning: 'số năm', soundLabel: 'Đếm 5', sentence: 'Five orange fish.', qEn: 'What number is it?', qVi: 'Đây là số mấy?', aTemplate: ["Number", 'five', '!'], lineColor: '#0ea5e9', svg: makeNumberSvg(5, '#38BDF8', '#075985') },
+          { id: 'six', word: 'six', ipa: '/sɪks/', meaning: 'số sáu', soundLabel: 'Đếm 6', sentence: 'Six happy friends.', qEn: 'What number is it?', qVi: 'Đây là số mấy?', aTemplate: ["Number", 'six', '!'], lineColor: '#a855f7', svg: makeNumberSvg(6, '#C084FC', '#581C87') }
+        ]
+      },
+      {
+        id: 'food',
+        titleVi: 'Đồ Ăn Ngon',
+        titleEn: 'Food',
+        icon: '🍎',
+        color: '#22C55E',
+        items: [
+          { id: 'apple', word: 'apple', ipa: '/ˈæpl/', meaning: 'quả táo', soundLabel: 'Rôm rốp', sentence: 'I eat a red apple.', qEn: 'What food is it?', qVi: 'Món gì đây nhỉ?', aTemplate: ["I", 'like', 'apple'], lineColor: '#ef4444', svg: FOOD_SVGS.apple },
+          { id: 'banana', word: 'banana', ipa: '/bəˈnɑːnə/', meaning: 'quả chuối', soundLabel: 'Ngon quá', sentence: 'The banana is sweet.', qEn: 'What food is it?', qVi: 'Món gì đây nhỉ?', aTemplate: ["I", 'like', 'banana'], lineColor: '#eab308', svg: FOOD_SVGS.banana },
+          { id: 'carrot', word: 'carrot', ipa: '/ˈkærət/', meaning: 'củ cà rốt', soundLabel: 'Giòn tan', sentence: 'Rabbits love carrots.', qEn: 'What food is it?', qVi: 'Món gì đây nhỉ?', aTemplate: ["I", 'like', 'carrot'], lineColor: '#f97316', svg: FOOD_SVGS.carrot },
+          { id: 'milk', word: 'milk', ipa: '/mɪlk/', meaning: 'sữa tươi', soundLabel: 'Ực ực', sentence: 'Drink warm milk.', qEn: 'What drink is it?', qVi: 'Thức uống gì đây?', aTemplate: ["I", 'like', 'milk'], lineColor: '#0ea5e9', svg: FOOD_SVGS.milk },
+          { id: 'cake', word: 'cake', ipa: '/keɪk/', meaning: 'bánh kem', soundLabel: 'Ngọt ngào', sentence: 'Happy birthday cake!', qEn: 'What food is it?', qVi: 'Món gì đây nhỉ?', aTemplate: ["I", 'like', 'cake'], lineColor: '#ec4899', svg: FOOD_SVGS.cake },
+          { id: 'bone', word: 'bone', ipa: '/bəʊn/', meaning: 'cục xương', soundLabel: 'Gặm gặm', sentence: 'A bone for the dog.', qEn: 'What is it?', qVi: 'Cái gì đây nhỉ?', aTemplate: ["It's", 'a', 'bone'], lineColor: '#d97706', svg: FOOD_SVGS.bone }
+        ]
+      },
+      {
+        id: 'actions',
+        titleVi: 'Hành Động',
+        titleEn: 'Actions',
+        icon: '🏃',
+        color: '#A855F7',
+        items: [
+          { id: 'jump', word: 'jump', ipa: '/dʒʌmp/', meaning: 'nhảy cao', soundLabel: 'Boing!', sentence: 'I can jump high.', qEn: 'What can you do?', qVi: 'Bé làm gì đây?', aTemplate: ['I', 'can', 'jump'], lineColor: '#f97316', svg: makeActionSvg('🦘', '#FFEDD5', '#EA580C') },
+          { id: 'run', word: 'run', ipa: '/rʌn/', meaning: 'chạy nhanh', soundLabel: 'Vù vù!', sentence: 'Let us run fast.', qEn: 'What can you do?', qVi: 'Bé làm gì đây?', aTemplate: ['I', 'can', 'run'], lineColor: '#ef4444', svg: makeActionSvg('🏃', '#FEE2E2', '#DC2626') },
+          { id: 'swim', word: 'swim', ipa: '/swɪm/', meaning: 'bơi lội', soundLabel: 'Ào ào!', sentence: 'Fish can swim.', qEn: 'What can you do?', qVi: 'Bé làm gì đây?', aTemplate: ['I', 'can', 'swim'], lineColor: '#0ea5e9', svg: makeActionSvg('🏊', '#E0F2FE', '#0284C7') },
+          { id: 'fly', word: 'fly', ipa: '/flaɪ/', meaning: 'bay lượn', soundLabel: 'Vút bay!', sentence: 'Birds can fly.', qEn: 'What can you do?', qVi: 'Bé làm gì đây?', aTemplate: ['I', 'can', 'fly'], lineColor: '#22c55e', svg: makeActionSvg('🦋', '#DCFCE7', '#16A34A') },
+          { id: 'sleep', word: 'sleep', ipa: '/sliːp/', meaning: 'ngủ ngon', soundLabel: 'Khò khò', sentence: 'Time to sleep.', qEn: 'What are you doing?', qVi: 'Bé làm gì đây?', aTemplate: ['I', 'can', 'sleep'], lineColor: '#a855f7', svg: makeActionSvg('😴', '#F3E8FF', '#9333EA') },
+          { id: 'eat', word: 'eat', ipa: '/iːt/', meaning: 'ăn ngon', soundLabel: 'Nham nham', sentence: 'Let us eat together.', qEn: 'What are you doing?', qVi: 'Bé làm gì đây?', aTemplate: ['I', 'can', 'eat'], lineColor: '#eab308', svg: makeActionSvg('😋', '#FEF9C3', '#CA8A04') }
+        ]
       }
     ];
 
-    // =========================================================================
-    // 2. QUẢN LÝ TRẠNG THÁI ỨNG DỤNG (STATE)
-    // =========================================================================
-    
-    // =========================================================================
-    // QUẢN LÝ 2 CHẾ ĐỘ HIỂN THỊ: 1. BẢN WEB (MÀN HÌNH RỘNG) & 2. BẢN MOBILE
-    // =========================================================================
+    // Trạng thái ứng dụng toàn cục
+    let currentTopicId = localStorage.getItem('topo_current_topic') || 'pets';
+    let currentAgeMode = localStorage.getItem('topo_age_mode') || 'preschool'; // 'preschool' | 'elementary'
     let currentViewMode = localStorage.getItem('topo_view_mode') || (window.innerWidth >= 900 ? 'web' : 'mobile');
-
-    function applyViewMode(mode) {
-      currentViewMode = mode;
-      localStorage.setItem('topo_view_mode', mode);
-
-      const shell = document.getElementById('app-shell');
-      const btnWeb = document.getElementById('mode-btn-web');
-      const btnMobile = document.getElementById('mode-btn-mobile');
-      const phoneNotch = document.getElementById('phone-notch');
-
-      if (!shell || !btnWeb || !btnMobile) return;
-
-      if (mode === 'web') {
-        shell.dataset.mode = 'web';
-        if (phoneNotch) phoneNotch.classList.add('hidden');
-
-        btnWeb.className = 'btn-lego min-h-[48px] flex items-center gap-2 px-4 py-2 rounded-xl font-display text-base font-bold bg-[#0EA5E9] text-white border-2 border-[#0284C7] shadow-[0_4px_0_#0369A1]';
-        btnMobile.className = 'btn-lego min-h-[48px] flex items-center gap-2 px-4 py-2 rounded-xl font-display text-base font-bold bg-[#F0F9FF] text-[#0369A1] border-2 border-[#BAE6FD] shadow-[0_4px_0_#7DD3FC]';
-      } else {
-        shell.dataset.mode = 'mobile';
-        if (phoneNotch) phoneNotch.classList.remove('hidden');
-
-        btnMobile.className = 'btn-lego min-h-[48px] flex items-center gap-2 px-4 py-2 rounded-xl font-display text-base font-bold bg-[#FF6B35] text-white border-2 border-[#EA580C] shadow-[0_4px_0_#C2410C]';
-        btnWeb.className = 'btn-lego min-h-[48px] flex items-center gap-2 px-4 py-2 rounded-xl font-display text-base font-bold bg-[#F0F9FF] text-[#0369A1] border-2 border-[#BAE6FD] shadow-[0_4px_0_#7DD3FC]';
-      }
-
-      // Vẽ lại đường nối nếu đang ở Bước 4 (Nối từ)
-      if (currentTab === 'match') {
-        setTimeout(drawAllMatchedLines, 80);
-      }
-    }
-
-    function switchViewMode(mode) {
-      applyViewMode(mode);
-      showToast(mode === 'web' ? 'Đã bật Chế độ Web (Màn hình lớn)' : 'Đã bật Chế độ Mobile');
-    }
-
     let learnedIds = new Set(JSON.parse(localStorage.getItem('topo_pets_learned') || '["cat"]'));
+    let pronounceStars = JSON.parse(localStorage.getItem('topo_pets_pronounce_stars') || '{}');
+    let currentArea = 'learn';
     let currentTab = 'grid';
 
-    // Trạng thái Bước 2: Tập phát âm
-    let currentPronounceIdx = 0;
-    let pronounceStars = JSON.parse(localStorage.getItem('topo_pets_pronounce_stars') || '{}'); // { cat: 3, ... }
-    let isRecording = false;
-    let activeRecognition = null;
-
-    // Trạng thái Bước 3: Bài tập 1 (Quiz)
-    let quizMode = 'listen';
-    let quizScore = 0;
-    let currentQuizTarget = null;
-    let isQuizLocked = false;
-
-    // Trạng thái Bước 4: Bài tập 2 (Nối từ)
-    let matchLeftOrder = [];
-    let matchRightOrder = [];
-    let selectedLeftId = null;
-    let selectedRightId = null;
-    let matchedPairs = []; // [{ id, lineColor }]
-    let showMatchHint = false;
-    let matchStartTime = null;
-    let dragStartSide = null; // 'left' | 'right'
-    let dragStartId = null;
-    let tempDragLine = null;
-
-    // Trạng thái Bước 5: Bài tập 2 - Ghép từ thành câu
-    let sentenceQueue = [];
-    let currentSentenceIdx = 0;
-    let sentenceCompletedCount = 0;
-    let sentenceBankTiles = []; // [{ uid, text, isUsed }]
-    let sentenceChosenTiles = []; // [tileObj, ...]
-    let isSentenceSolved = false;
+    function getCurrentTopic() {
+      return TOPICS_DATA.find(t => t.id === currentTopicId) || TOPICS_DATA[0];
+    }
+    function getActiveItems() {
+      return getCurrentTopic().items;
+    }
 
     // =========================================================================
-    // 3. PHÁT ÂM TIẾNG ANH & HIỆU ỨNG ÂM THANH VUI NHỘN (WEB SPEECH & TONE.JS)
+    // 2. HỆ THỐNG ÂM THANH (WEB AUDIO + TONE.JS + SPEECH SYNTHESIS)
     // =========================================================================
+    let appAudioContext = null;
+    function getAudioCtx() {
+      if (!appAudioContext) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) appAudioContext = new AudioCtx();
+      }
+      if (appAudioContext && appAudioContext.state === 'suspended') appAudioContext.resume();
+      return appAudioContext;
+    }
+
+    function playPopSound() {
+      try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(900, now + 0.06);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.005, now + 0.07);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(now); osc.stop(now + 0.075);
+      } catch (e) {}
+    }
+
+    function playAnimalSound(itemId) {
+      try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        if (itemId === 'cat') {
+          const osc = ctx.createOscillator(), filter = ctx.createBiquadFilter(), gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(360, now);
+          osc.frequency.exponentialRampToValueAtTime(780, now + 0.18);
+          osc.frequency.exponentialRampToValueAtTime(450, now + 0.52);
+          filter.type = 'bandpass'; filter.frequency.setValueAtTime(1200, now); filter.Q.value = 3.5;
+          gain.gain.setValueAtTime(0.01, now); gain.gain.linearRampToValueAtTime(0.35, now + 0.08); gain.gain.exponentialRampToValueAtTime(0.005, now + 0.55);
+          osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 0.58);
+        } else if (itemId === 'dog') {
+          [0, 0.2].forEach(off => {
+            const t = now + off, osc = ctx.createOscillator(), gain = ctx.createGain();
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(420, t); osc.frequency.exponentialRampToValueAtTime(140, t + 0.13);
+            gain.gain.setValueAtTime(0.45, t); gain.gain.exponentialRampToValueAtTime(0.005, t + 0.14);
+            osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.15);
+          });
+        } else if (itemId === 'bird') {
+          [0, 0.11, 0.23].forEach(off => {
+            const t = now + off, osc = ctx.createOscillator(), gain = ctx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(2200, t); osc.frequency.exponentialRampToValueAtTime(3500, t + 0.04);
+            gain.gain.setValueAtTime(0.28, t); gain.gain.exponentialRampToValueAtTime(0.005, t + 0.08);
+            osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.085);
+          });
+        } else if (itemId === 'fish') {
+          [0, 0.1, 0.22, 0.34].forEach((off, i) => {
+            const t = now + off, osc = ctx.createOscillator(), gain = ctx.createGain();
+            const f = [460, 680, 540, 820][i];
+            osc.type = 'sine'; osc.frequency.setValueAtTime(f * 0.7, t); osc.frequency.exponentialRampToValueAtTime(f * 1.5, t + 0.055);
+            gain.gain.setValueAtTime(0.32, t); gain.gain.exponentialRampToValueAtTime(0.005, t + 0.065);
+            osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.07);
+          });
+        } else if (itemId === 'rabbit' || itemId === 'hamster') {
+          [0, 0.12, 0.24].forEach(off => {
+            const t = now + off, osc = ctx.createOscillator(), gain = ctx.createGain();
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(1600, t); osc.frequency.exponentialRampToValueAtTime(2400, t + 0.04);
+            gain.gain.setValueAtTime(0.25, t); gain.gain.exponentialRampToValueAtTime(0.005, t + 0.08);
+            osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.085);
+          });
+        } else {
+          // Playful xylophone chime for Colors / Numbers / Food / Actions
+          const notes = [523, 587, 659, 698, 784, 880];
+          const idx = Math.abs(itemId.charCodeAt(0) + itemId.length) % notes.length;
+          const osc = ctx.createOscillator(), gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(notes[idx], now);
+          osc.frequency.exponentialRampToValueAtTime(notes[idx] * 1.25, now + 0.12);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.005, now + 0.25);
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 0.26);
+        }
+      } catch (e) {}
+    }
+
+    function playApplause() {
+      try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        const now = ctx.currentTime, duration = 1.4;
+        const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * duration), ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < data.length; i++) {
+          data[i] = (Math.random() * 2 - 1) * 0.35 + (Math.random() > 0.86 ? (Math.random() * 2 - 1) * 2.5 : 0);
+        }
+        const noise = ctx.createBufferSource(); noise.buffer = buf;
+        const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 1150;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.01, now); gain.gain.linearRampToValueAtTime(0.4, now + 0.1); gain.gain.exponentialRampToValueAtTime(0.005, now + duration);
+        noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+        noise.start(now); noise.stop(now + duration);
+
+        if (typeof Tone !== 'undefined') {
+          Tone.start().then(() => {
+            const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+            const t = Tone.now();
+            synth.triggerAttackRelease(['C5', 'E5', 'G5'], '8n', t);
+            synth.triggerAttackRelease(['E5', 'G5', 'C6'], '4n', t + 0.18);
+          }).catch(() => {});
+        }
+      } catch (e) {}
+    }
+
+    function playSoundEffect(type) {
+      try {
+        if (typeof Tone === 'undefined') return;
+        Tone.start().then(() => {
+          const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+          const now = Tone.now();
+          if (type === 'correct') {
+            synth.triggerAttackRelease('C5', '16n', now);
+            synth.triggerAttackRelease('E5', '16n', now + 0.08);
+            synth.triggerAttackRelease('G5', '8n', now + 0.16);
+          } else if (type === 'wrong') {
+            synth.triggerAttackRelease('E4', '16n', now);
+            synth.triggerAttackRelease('C4', '8n', now + 0.12);
+          } else if (type === 'star') {
+            synth.triggerAttackRelease('G5', '16n', now);
+            synth.triggerAttackRelease('B5', '8n', now + 0.08);
+          }
+        }).catch(() => {});
+      } catch (e) {}
+    }
+
     function speakWord(text, isSlow = false) {
       if ('speechSynthesis' in window) {
         try {
           window.speechSynthesis.cancel();
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.lang = 'en-US';
-          utterance.rate = isSlow ? 0.65 : 0.85; // Tốc độ ấm áp, rõ ràng cho tai trẻ
-          utterance.pitch = 1.25; // Cao độ tươi vui, truyền cảm như cô giáo
-
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = 'en-US';
+          u.rate = isSlow ? 0.65 : 0.85;
+          u.pitch = 1.25;
           const voices = window.speechSynthesis.getVoices();
-          const preferredVoice = voices.find(v =>
-            v.lang.includes('en-US') && (v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Female'))
-          ) || voices.find(v => v.lang.includes('en'));
+          const v = voices.find(x => x.lang.includes('en-US') && (x.name.includes('Google') || x.name.includes('Samantha'))) || voices.find(x => x.lang.includes('en'));
+          if (v) u.voice = v;
+          window.speechSynthesis.speak(u);
+        } catch (e) {}
+      }
+    }
 
-          if (preferredVoice) {
-            utterance.voice = preferredVoice;
+    function speakPraise() {
+      if ('speechSynthesis' in window) {
+        const list = ['Tuyệt vời quá bé ơi!', 'Bé thông minh lắm!', 'Hoan hô bé, giỏi quá!', 'Cô khen bé mười điểm luôn!'];
+        const u = new SpeechSynthesisUtterance(list[Math.floor(Math.random() * list.length)]);
+        u.lang = 'vi-VN'; u.pitch = 1.35; u.rate = 1.0;
+        window.speechSynthesis.speak(u);
+      }
+    }
+
+    function spawnKidParticles(x, y) {
+      const icons = ['⭐', '🌟', '💛', '✨'];
+      for (let i = 0; i < 4; i++) {
+        const el = document.createElement('span');
+        el.className = 'kid-particle text-2xl';
+        el.textContent = icons[i % icons.length];
+        el.style.left = `${x + (Math.random() * 60 - 30)}px`;
+        el.style.top = `${y + (Math.random() * 40 - 20)}px`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 750);
+      }
+    }
+
+    // =========================================================================
+    // 3. QUẢN LÝ CHẾ ĐỘ WEB/MOBILE, ĐỘ TUỔI & 5 CHỦ ĐỀ
+    // =========================================================================
+    function applyViewMode(mode) {
+      currentViewMode = mode;
+      localStorage.setItem('topo_view_mode', mode);
+      const shell = document.getElementById('app-shell');
+      const btnW = document.getElementById('mode-btn-web');
+      const btnM = document.getElementById('mode-btn-mobile');
+      const notch = document.getElementById('phone-notch');
+      if (!shell) return;
+      shell.dataset.mode = mode;
+      if (mode === 'web') {
+        if (notch) notch.classList.add('hidden');
+        btnW.className = 'btn-lego min-h-[44px] flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-display text-sm sm:text-base font-bold bg-[#0EA5E9] text-white border-2 border-[#0284C7] shadow-[0_4px_0_#0369A1]';
+        btnM.className = 'btn-lego min-h-[44px] flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-display text-sm sm:text-base font-bold bg-[#F0F9FF] text-[#0369A1] border-2 border-[#BAE6FD] shadow-[0_4px_0_#7DD3FC]';
+      } else {
+        if (notch) notch.classList.remove('hidden');
+        btnM.className = 'btn-lego min-h-[44px] flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-display text-sm sm:text-base font-bold bg-[#FF6B35] text-white border-2 border-[#EA580C] shadow-[0_4px_0_#C2410C]';
+        btnW.className = 'btn-lego min-h-[44px] flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-display text-sm sm:text-base font-bold bg-[#F0F9FF] text-[#0369A1] border-2 border-[#BAE6FD] shadow-[0_4px_0_#7DD3FC]';
+      }
+      if (currentTab === 'match') setTimeout(drawAllMatchedLines, 80);
+    }
+    function switchViewMode(mode) {
+      applyViewMode(mode);
+      showToast(mode === 'web' ? '💻 Chế độ Web (Màn hình lớn)' : '📱 Chế độ Mobile');
+    }
+
+    function setAgeMode(age) {
+      currentAgeMode = age;
+      localStorage.setItem('topo_age_mode', age);
+      const bPre = document.getElementById('age-btn-preschool');
+      const bEle = document.getElementById('age-btn-elementary');
+      if (age === 'preschool') {
+        bPre.className = 'btn-lego min-h-[44px] px-3 py-1.5 rounded-xl font-display text-sm sm:text-base font-bold bg-[#22C55E] text-white border-2 border-[#16A34A] shadow-[0_4px_0_#15803D]';
+        bEle.className = 'btn-lego min-h-[44px] px-3 py-1.5 rounded-xl font-display text-sm sm:text-base font-bold bg-[#F0FDF4] text-[#15803D] border-2 border-[#86EFAC] shadow-[0_4px_0_#4ADE80]';
+      } else {
+        bEle.className = 'btn-lego min-h-[44px] px-3 py-1.5 rounded-xl font-display text-sm sm:text-base font-bold bg-[#A855F7] text-white border-2 border-[#9333EA] shadow-[0_4px_0_#6B21A8]';
+        bPre.className = 'btn-lego min-h-[44px] px-3 py-1.5 rounded-xl font-display text-sm sm:text-base font-bold bg-[#F0FDF4] text-[#15803D] border-2 border-[#86EFAC] shadow-[0_4px_0_#4ADE80]';
+      }
+      renderGrid();
+      if (currentTab === 'pronounce') renderPronounceView();
+      if (currentTab === 'memory') initMemoryGame();
+      if (currentTab === 'spelling') initSpellingGame();
+      showToast(age === 'preschool' ? '🐣 Chế độ Mầm non (4-5 tuổi)' : '🚀 Chế độ Tiểu học (6-10 tuổi)');
+    }
+
+    function renderTopicSelector() {
+      const el = document.getElementById('topic-selector');
+      el.innerHTML = '';
+      TOPICS_DATA.forEach(t => {
+        const active = t.id === currentTopicId;
+        const btn = document.createElement('button');
+        btn.onclick = () => { playPopSound(); selectTopic(t.id); };
+        btn.className = active
+          ? 'btn-lego shrink-0 min-h-[52px] px-4 py-2 rounded-2xl font-display text-base font-bold bg-[#FACC15] text-[#451A03] border-2 border-[#EAB308] shadow-[0_5px_0_#CA8A04] flex items-center gap-2'
+          : 'btn-lego shrink-0 min-h-[52px] px-4 py-2 rounded-2xl font-display text-base font-bold bg-white text-[#0369A1] border-2 border-[#BAE6FD] shadow-[0_4px_0_#7DD3FC] flex items-center gap-2';
+        btn.innerHTML = `<span class="text-xl">${t.icon}</span><span>${t.titleVi}</span>`;
+        el.appendChild(btn);
+      });
+      document.getElementById('header-topic-subtitle').textContent = `Chủ đề: ${getCurrentTopic().titleVi} (${getCurrentTopic().titleEn})`;
+    }
+
+    function selectTopic(topicId) {
+      currentTopicId = topicId;
+      localStorage.setItem('topo_current_topic', topicId);
+      currentPronounceIdx = 0;
+      matchedPairs = [];
+      sentenceQueue = [];
+      renderTopicSelector();
+      renderGrid();
+      if (currentTab === 'pronounce') renderPronounceView();
+      else if (currentTab === 'quiz') generateQuizQuestion();
+      else if (currentTab === 'match') initMatchGame();
+      else if (currentTab === 'sentence') initSentenceGame();
+      else if (currentTab === 'memory') initMemoryGame();
+      else if (currentTab === 'bubble') initBubbleGame();
+      else if (currentTab === 'feed') initFeedGame();
+      else if (currentTab === 'spelling') initSpellingGame();
+      showToast(`Đã chuyển sang chủ đề: ${getCurrentTopic().titleVi}`);
+    }
+
+    function switchArea(area) {
+      currentArea = area;
+      const bLearn = document.getElementById('area-btn-learn');
+      const bGames = document.getElementById('area-btn-games');
+      const bPet = document.getElementById('area-btn-pethouse');
+      const navLearn = document.getElementById('subnav-learn');
+      const navGames = document.getElementById('subnav-games');
+
+      const off = 'btn-lego min-h-[60px] rounded-2xl font-display font-bold text-base sm:text-[19px] flex items-center justify-center gap-2 bg-white text-[#0369A1] border-2 border-[#BAE6FD] shadow-[0_5px_0_#7DD3FC]';
+      bLearn.className = off; bGames.className = off; bPet.className = off;
+
+      if (area === 'learn') {
+        bLearn.className = 'btn-lego min-h-[60px] rounded-2xl font-display font-bold text-base sm:text-[19px] flex items-center justify-center gap-2 bg-[#0EA5E9] text-white border-2 border-[#0284C7] shadow-[0_5px_0_#0369A1]';
+        navLearn.classList.remove('hidden'); navLearn.classList.add('grid');
+        navGames.classList.add('hidden'); navGames.classList.remove('grid');
+        if (!['grid','pronounce','quiz','match','sentence'].includes(currentTab)) switchTab('grid');
+      } else if (area === 'games') {
+        bGames.className = 'btn-lego min-h-[60px] rounded-2xl font-display font-bold text-base sm:text-[19px] flex items-center justify-center gap-2 bg-[#A855F7] text-white border-2 border-[#9333EA] shadow-[0_5px_0_#6B21A8]';
+        navGames.classList.remove('hidden'); navGames.classList.add('grid');
+        navLearn.classList.add('hidden'); navLearn.classList.remove('grid');
+        if (!['memory','bubble','feed','spelling'].includes(currentTab)) switchTab('memory');
+      } else {
+        bPet.className = 'btn-lego min-h-[60px] rounded-2xl font-display font-bold text-base sm:text-[19px] flex items-center justify-center gap-2 bg-[#22C55E] text-white border-2 border-[#16A34A] shadow-[0_5px_0_#15803D]';
+        navLearn.classList.add('hidden'); navGames.classList.add('hidden');
+        switchTab('pethouse');
+      }
+    }
+
+    function switchTab(tab) {
+      stopRecognitionIfRunning();
+      currentTab = tab;
+      const allViews = ['grid','pronounce','quiz','match','sentence','memory','bubble','feed','spelling','pethouse'];
+      allViews.forEach(v => {
+        const view = document.getElementById(`view-${v}`);
+        if (view) {
+          if (v === tab) { view.classList.remove('hidden'); if (v !== 'grid') view.classList.add('flex'); }
+          else { view.classList.add('hidden'); view.classList.remove('flex'); }
+        }
+        const btn = document.getElementById(`tab-${v}`);
+        if (btn) {
+          if (v === tab) {
+            btn.className = 'btn-lego tab-btn min-h-[60px] py-2 px-1 rounded-2xl font-display font-bold text-xs sm:text-[17px] flex flex-col items-center justify-center gap-0.5 bg-[#FF6B35] text-white border-2 border-[#EA580C] shadow-[0_5px_0_#C2410C]';
+          } else {
+            btn.className = 'btn-lego tab-btn min-h-[60px] py-2 px-1 rounded-2xl font-display font-bold text-xs sm:text-[17px] flex flex-col items-center justify-center gap-0.5 bg-white text-[#0369A1] border-2 border-[#BAE6FD] shadow-[0_5px_0_#7DD3FC]';
           }
-          window.speechSynthesis.speak(utterance);
-        } catch (err) {
-          console.warn('Speech synthesis error:', err);
         }
-      }
+      });
+
+      if (tab === 'pronounce') renderPronounceView();
+      else if (tab === 'quiz') generateQuizQuestion();
+      else if (tab === 'match') initMatchGame();
+      else if (tab === 'sentence') initSentenceGame();
+      else if (tab === 'memory') initMemoryGame();
+      else if (tab === 'bubble') initBubbleGame();
+      else if (tab === 'feed') initFeedGame();
+      else if (tab === 'spelling') initSpellingGame();
+      else if (tab === 'pethouse') renderPetHouse();
     }
 
-    async function playSoundEffect(type) {
-      try {
-        if (typeof Tone === 'undefined') return;
-        await Tone.start();
-        const synth = new Tone.PolySynth(Tone.Synth, {
-          oscillator: { type: 'triangle' },
-          envelope: { attack: 0.02, decay: 0.15, sustain: 0.1, release: 0.4 }
-        }).toDestination();
-
-        if (type === 'correct') {
-          const now = Tone.now();
-          synth.triggerAttackRelease('C5', '16n', now);
-          synth.triggerAttackRelease('E5', '16n', now + 0.09);
-          synth.triggerAttackRelease('G5', '8n', now + 0.18);
-          synth.triggerAttackRelease('C6', '4n', now + 0.28);
-        } else if (type === 'wrong') {
-          const now = Tone.now();
-          synth.triggerAttackRelease('E4', '16n', now);
-          synth.triggerAttackRelease('C4', '8n', now + 0.12);
-        } else if (type === 'star') {
-          const now = Tone.now();
-          synth.triggerAttackRelease('G5', '16n', now);
-          synth.triggerAttackRelease('B5', '8n', now + 0.08);
-        }
-      } catch (e) {
-        // Bỏ qua nếu trình duyệt chặn autoplay audio
-      }
-    }
-
-    // =========================================================================
-    // 4. CẬP NHẬT TIẾN ĐỘ & RENDER CHẾ ĐỘ LƯỚI (GRID VIEW)
-    // =========================================================================
     function updateProgressUI() {
-      const count = learnedIds.size;
-      const total = PETS_DATA.length;
-      const percent = Math.round((count / total) * 100);
-
-      const progressText = document.getElementById('progress-text');
-      const progressBar = document.getElementById('progress-bar');
-      if (progressText) progressText.textContent = `${count}/${total} từ`;
-      if (progressBar) progressBar.style.width = `${percent}%`;
+      const totalWords = TOPICS_DATA.reduce((sum, t) => sum + t.items.length, 0);
+      document.getElementById('progress-text').textContent = `${learnedIds.size}/${totalWords} từ`;
       localStorage.setItem('topo_pets_learned', JSON.stringify([...learnedIds]));
     }
 
+    // =========================================================================
+    // 4. BƯỚC 1: TỪ VỰNG (GRID VIEW)
+    // =========================================================================
     function renderGrid() {
       const gridEl = document.getElementById('pets-grid');
       gridEl.innerHTML = '';
+      const items = getActiveItems();
+      const showIpa = currentAgeMode === 'elementary';
 
-      PETS_DATA.forEach((pet, index) => {
-        const isLearned = learnedIds.has(pet.id);
+      items.forEach((item, index) => {
+        const isLearned = learnedIds.has(item.id);
         const card = document.createElement('div');
-        card.id = `card-${pet.id}`;
+        card.id = `card-${item.id}`;
         card.className = `pet-card relative bg-white rounded-3xl border-4 ${isLearned ? 'border-[#22C55E] shadow-[0_8px_0_#16A34A]' : 'border-[#BAE6FD] shadow-[0_8px_0_#7DD3FC]'} p-5 flex flex-col items-center text-center cursor-pointer select-none transition-transform hover:-translate-y-1`;
         card.innerHTML = `
           <div class="w-full flex items-center justify-between mb-2">
-            <button onclick="event.stopPropagation(); playPopSound(); toggleLearned('${pet.id}')"
-              class="btn-lego w-14 h-14 rounded-2xl flex items-center justify-center border-2 ${isLearned ? 'bg-[#FEF08A] border-[#FACC15] shadow-[0_4px_0_#CA8A04] text-[#EA580C]' : 'bg-[#F0F9FF] border-[#BAE6FD] shadow-[0_4px_0_#7DD3FC] text-[#94A3B8]'}"
-              title="Đánh dấu đã thuộc">
-              <svg class="w-8 h-8" fill="${isLearned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <button onclick="event.stopPropagation(); playPopSound(); toggleLearned('${item.id}')"
+              class="btn-lego w-14 h-14 rounded-2xl flex items-center justify-center border-2 ${isLearned ? 'bg-[#FEF08A] border-[#FACC15] shadow-[0_4px_0_#CA8A04] text-[#EA580C]' : 'bg-[#F0F9FF] border-[#BAE6FD] shadow-[0_4px_0_#7DD3FC] text-[#94A3B8]'}">
+              <span class="text-2xl">${isLearned ? '⭐' : '☆'}</span>
             </button>
-
-            <span class="text-base font-bold text-[#0369A1] bg-[#E0F2FE] px-3 py-1 rounded-xl">
-              ${pet.ipa}
-            </span>
-
+            ${showIpa ? `<span class="text-base font-bold text-[#0369A1] bg-[#E0F2FE] px-3 py-1 rounded-xl">${item.ipa}</span>` : '<span></span>'}
             <button onclick="event.stopPropagation(); playPopSound(); openPronounceAt(${index})"
-              class="btn-lego w-14 h-14 rounded-2xl bg-[#FFEDD5] hover:bg-[#FED7AA] border-2 border-[#FDBA74] shadow-[0_4px_0_#EA580C] text-[#C2410C] flex items-center justify-center"
-              title="Luyện nói">
-              <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3z"/></svg>
+              class="btn-lego w-14 h-14 rounded-2xl bg-[#FFEDD5] border-2 border-[#FDBA74] shadow-[0_4px_0_#EA580C] text-[#C2410C] flex items-center justify-center text-2xl">
+              🎙️
             </button>
           </div>
-
-          <div class="font-display text-[20px] font-bold text-[#14532D] bg-[#DCFCE7] px-4 py-1 rounded-2xl mt-1">
-            Con ${pet.meaning}
-          </div>
-
-          <div id="svg-wrap-${pet.id}" class="w-32 h-32 sm:w-36 sm:h-36 flex items-center justify-center my-2 transition-transform">
-            ${pet.svg}
-          </div>
-
-          <div class="font-display font-bold text-3xl sm:text-4xl text-[#FF6B35] leading-none tracking-wide mb-3">
-            ${pet.word}
-          </div>
-
+          <div class="font-display text-[20px] font-bold text-[#14532D] bg-[#DCFCE7] px-4 py-1 rounded-2xl mt-1">${item.meaning}</div>
+          <div id="svg-wrap-${item.id}" class="w-32 h-32 sm:w-36 sm:h-36 flex items-center justify-center my-2">${item.svg}</div>
+          <div class="font-display font-bold text-3xl sm:text-4xl text-[#FF6B35] leading-none mb-3">${item.word}</div>
           <div class="w-full grid grid-cols-2 gap-3 pt-3 border-t-2 border-[#F0F9FF]">
-            <button onclick="event.stopPropagation(); bouncePetCard('${pet.id}'); playAnimalSound('${pet.id}')"
-              class="btn-lego min-h-[60px] py-2 px-2 rounded-2xl bg-[#FACC15] hover:bg-[#EAB308] border-2 border-[#EAB308] shadow-[0_5px_0_#CA8A04] active:shadow-[0_2px_0_#CA8A04] text-[#451A03] font-display text-[17px] font-bold flex items-center justify-center gap-1.5">
-              <svg class="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 10c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-4.5 1c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm9 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-4.5 2c-2.33 0-4.31 1.46-5.11 3.5h10.22c-.8-2.04-2.78-3.5-5.11-3.5z"/></svg>
-              <span class="truncate">${pet.soundLabel}</span>
+            <button onclick="event.stopPropagation(); bouncePetCard('${item.id}'); playAnimalSound('${item.id}')"
+              class="btn-lego min-h-[60px] py-2 px-2 rounded-2xl bg-[#FACC15] border-2 border-[#EAB308] shadow-[0_5px_0_#CA8A04] text-[#451A03] font-display text-[16px] font-bold truncate">
+              🔊 ${item.soundLabel}
             </button>
-            <button onclick="event.stopPropagation(); bouncePetCard('${pet.id}'); speakWord('${pet.word}')"
-              class="btn-lego min-h-[60px] py-2 px-2 rounded-2xl bg-[#0EA5E9] hover:bg-[#0284C7] border-2 border-[#0284C7] shadow-[0_5px_0_#0369A1] active:shadow-[0_2px_0_#0369A1] text-white font-display text-[17px] font-bold flex items-center justify-center gap-1.5">
-              <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-              <span>Đọc</span>
+            <button onclick="event.stopPropagation(); bouncePetCard('${item.id}'); speakWord('${item.word}')"
+              class="btn-lego min-h-[60px] py-2 px-2 rounded-2xl bg-[#0EA5E9] border-2 border-[#0284C7] shadow-[0_5px_0_#0369A1] text-white font-display text-[16px] font-bold">
+              🗣️ Đọc tên
             </button>
           </div>
         `;
-
-        // Khi bấm vào thẻ: Phát âm + hiệu ứng nảy jelly
-        card.addEventListener('click', () => {
-          triggerCardSpeak(pet);
-        });
-
+        card.addEventListener('click', () => triggerCardSpeak(item));
         gridEl.appendChild(card);
       });
     }
@@ -1132,21 +1323,16 @@
     function bouncePetCard(id) {
       const wrap = document.getElementById(`svg-wrap-${id}`);
       if (wrap) {
-        wrap.classList.remove('animate-pop-bounce');
-        void wrap.offsetWidth;
-        wrap.classList.add('animate-pop-bounce');
+        wrap.classList.remove('animate-pop-bounce'); void wrap.offsetWidth; wrap.classList.add('animate-pop-bounce');
         const rect = wrap.getBoundingClientRect();
         spawnKidParticles(rect.left + rect.width / 2, rect.top + rect.height / 2);
       }
     }
 
-    // Khi chạm cả thẻ: Phát tiếng kêu con vật trước -> Rung rinh -> Sau đó giọng cô giáo đọc tên!
-    function triggerCardSpeak(pet) {
-      bouncePetCard(pet.id);
-      playAnimalSound(pet.id);
-      setTimeout(() => {
-        speakWord(pet.word, false);
-      }, 450);
+    function triggerCardSpeak(item) {
+      bouncePetCard(item.id);
+      playAnimalSound(item.id);
+      setTimeout(() => speakWord(item.word, false), 420);
     }
 
     function toggleLearned(id) {
@@ -1156,1004 +1342,636 @@
       } else {
         learnedIds.add(id);
         playSoundEffect('star');
-        showToast('Tuyệt vời! Bé đã thuộc thêm 1 từ vựng.');
-        if (learnedIds.size === PETS_DATA.length) {
-          launchConfetti();
-          showToast('Chúc mừng! Bé đã thuộc tất cả 6 từ vựng!');
-        }
+        showToast('Tuyệt vời! Bé thuộc thêm 1 từ ⭐');
       }
-      applyViewMode(currentViewMode);
       updateProgressUI();
       renderGrid();
     }
 
-    // Đọc lần lượt tất cả 6 từ
     let playAllTimer = null;
     function playAllSequence() {
-      if (playAllTimer) {
-        clearTimeout(playAllTimer);
-        playAllTimer = null;
-      }
+      if (playAllTimer) clearTimeout(playAllTimer);
+      const items = getActiveItems();
       let i = 0;
       function step() {
-        if (i >= PETS_DATA.length || currentTab !== 'grid') return;
-        const pet = PETS_DATA[i];
-        triggerCardSpeak(pet);
-        const card = document.getElementById(`card-${pet.id}`);
-        if (card) {
-          card.classList.add('ring-4', 'ring-sky-400');
-          setTimeout(() => card.classList.remove('ring-4', 'ring-sky-400'), 1100);
-        }
+        if (i >= items.length || currentTab !== 'grid') return;
+        triggerCardSpeak(items[i]);
         i++;
-        playAllTimer = setTimeout(step, 1350);
+        playAllTimer = setTimeout(step, 1400);
       }
       step();
     }
 
     // =========================================================================
-    // 5. BƯỚC 2: PHÒNG TẬP PHÁT ÂM (PRONUNCIATION STUDIO)
+    // 5. BƯỚC 2: TẬP PHÁT ÂM
     // =========================================================================
+    let currentPronounceIdx = 0;
+    let isRecording = false, activeRecognition = null;
+
     function openPronounceAt(index) {
       currentPronounceIdx = index;
+      switchArea('learn');
       switchTab('pronounce');
     }
 
     function renderPronounceView() {
-      const pet = PETS_DATA[currentPronounceIdx];
-      const practicedCount = Object.keys(pronounceStars).length;
-      document.getElementById('pronounce-progress-badge').textContent = `${practicedCount}/${PETS_DATA.length} từ đã nói`;
+      const items = getActiveItems();
+      if (currentPronounceIdx >= items.length) currentPronounceIdx = 0;
+      const item = items[currentPronounceIdx];
+      const practicedCount = items.filter(it => pronounceStars[it.id] > 0).length;
+      document.getElementById('pronounce-progress-badge').textContent = `${practicedCount}/${items.length} từ đã nói`;
 
-      // Render dãy nút chọn nhanh 6 từ
       const pillsEl = document.getElementById('pronounce-pills');
       pillsEl.innerHTML = '';
-      PETS_DATA.forEach((item, idx) => {
-        const stars = pronounceStars[item.id] || 0;
+      items.forEach((it, idx) => {
+        const stars = pronounceStars[it.id] || 0;
         const isCurrent = idx === currentPronounceIdx;
         const btn = document.createElement('button');
-        btn.onclick = () => {
-          stopRecognitionIfRunning();
-          currentPronounceIdx = idx;
-          renderPronounceView();
-          speakPronounceTarget(false);
-        };
+        btn.onclick = () => { stopRecognitionIfRunning(); currentPronounceIdx = idx; renderPronounceView(); speakPronounceTarget(false); };
         btn.className = `btn-lego min-h-[56px] py-2 px-2 rounded-2xl text-base font-display font-bold border-2 flex flex-col items-center justify-center ${
-          isCurrent
-            ? 'bg-[#FF6B35] border-[#EA580C] text-white shadow-[0_4px_0_#C2410C]'
-            : stars > 0
-              ? 'bg-[#DCFCE7] border-[#22C55E] text-[#14532D] shadow-[0_4px_0_#16A34A]'
-              : 'bg-white border-[#BAE6FD] text-[#0369A1] shadow-[0_4px_0_#7DD3FC]'
+          isCurrent ? 'bg-[#FF6B35] border-[#EA580C] text-white shadow-[0_4px_0_#C2410C]'
+          : stars > 0 ? 'bg-[#DCFCE7] border-[#22C55E] text-[#14532D] shadow-[0_4px_0_#16A34A]'
+          : 'bg-white border-[#BAE6FD] text-[#0369A1] shadow-[0_4px_0_#7DD3FC]'
         }`;
-        btn.innerHTML = `
-          <span class="truncate max-w-full">${item.word}</span>
-          <span class="text-[9px] leading-none mt-0.5">${stars > 0 ? '⭐'.repeat(stars) : '•'}</span>
-        `;
+        btn.innerHTML = `<span class="truncate max-w-full">${it.word}</span><span class="text-xs">${stars > 0 ? '⭐'.repeat(stars) : '•'}</span>`;
         pillsEl.appendChild(btn);
       });
 
-      // Cập nhật thông tin nhân vật
-      document.getElementById('pr-illustration').innerHTML = pet.svg;
-      document.getElementById('pr-word').textContent = pet.word;
-      document.getElementById('pr-ipa').textContent = pet.ipa;
-      document.getElementById('pr-meaning').textContent = pet.meaning;
-      document.getElementById('pr-sentence').textContent = pet.sentence;
-      const soundBtnLabel = document.getElementById('pr-animal-sound-btn');
-      if (soundBtnLabel) soundBtnLabel.textContent = `Tiếng kêu: ${pet.soundLabel}`;
+      document.getElementById('pr-illustration').innerHTML = item.svg;
+      document.getElementById('pr-word').textContent = item.word;
+      const ipaEl = document.getElementById('pr-ipa');
+      ipaEl.textContent = item.ipa;
+      ipaEl.style.display = currentAgeMode === 'elementary' ? 'inline-block' : 'none';
+      document.getElementById('pr-meaning').textContent = item.meaning;
+      document.getElementById('pr-sentence').textContent = item.sentence;
+      document.getElementById('pr-animal-sound-btn').textContent = item.soundLabel;
 
-      // Hiển thị số sao đã đạt của từ hiện tại
-      const currentStars = pronounceStars[pet.id] || 0;
-      const starHtml = [1, 2, 3].map(n =>
-        n <= currentStars
-          ? '<span class="drop-shadow-sm">⭐</span>'
-          : '<span class="opacity-25">⭐</span>'
-      ).join('');
-      document.getElementById('pronounce-stars-display').innerHTML = starHtml;
-
-      // Đặt lại trạng thái hộp kết quả
+      const s = pronounceStars[item.id] || 0;
+      document.getElementById('pronounce-stars-display').innerHTML = [1,2,3].map(n => n <= s ? '<span class="text-[#FACC15]">★</span>' : '<span class="opacity-25 text-[#FACC15]">★</span>').join('');
       resetMicVisuals();
-      const resultBox = document.getElementById('pr-result-box');
-      if (currentStars > 0) {
-        resultBox.innerHTML = `<p class="text-xs font-extrabold text-emerald-600">Bé đã đạt ${currentStars} sao cho từ "${pet.word}"! Bấm Micro để luyện lại nhé.</p>`;
-      } else {
-        resultBox.innerHTML = `<p class="text-xs font-bold text-slate-400">Nhấn nút Micro và đọc to từ "<span class="text-[#E84C3D]">${pet.word}</span>" nhé!</p>`;
-      }
-
-      // Cập nhật banner dẫn sang Bài tập 2: Nối từ
-      const ctaTitle = document.getElementById('pronounce-cta-title');
-      if (practicedCount >= PETS_DATA.length) {
-        ctaTitle.textContent = 'Hoàn thành Tập phát âm 6/6 từ! Sang bài tiếp theo ngay';
-      } else if (practicedCount > 0) {
-        ctaTitle.textContent = `Rất tốt (${practicedCount}/6 từ)! Chuyển sang Bài tập 4: Nối từ`;
-      } else {
-        ctaTitle.textContent = 'Sẵn sàng thử thách tiếp theo chưa bé?';
-      }
+      document.getElementById('pr-result-box').innerHTML = `<p class="text-[18px] font-bold text-[#475569]">Bấm nút Micro và đọc to từ "${item.word}" nhé!</p>`;
     }
 
-    
     function onPronounceIllustrationClick() {
       playCurrentPetAnimalSound();
       setTimeout(() => speakPronounceTarget(false), 450);
     }
-
     function playCurrentPetAnimalSound() {
-      const pet = PETS_DATA[currentPronounceIdx];
-      playAnimalSound(pet.id);
+      const item = getActiveItems()[currentPronounceIdx];
+      playAnimalSound(item.id);
       const illu = document.getElementById('pr-illustration');
-      if (illu) {
-        illu.classList.remove('animate-bounce-pet');
-        void illu.offsetWidth;
-        illu.classList.add('animate-bounce-pet');
-        const rect = illu.getBoundingClientRect();
-        spawnSparkles(rect.left + rect.width / 2, rect.top + 20);
-      }
+      illu.classList.remove('animate-pop-bounce'); void illu.offsetWidth; illu.classList.add('animate-pop-bounce');
     }
-
-    function speakPronounceTarget(isSlow) {
-      const pet = PETS_DATA[currentPronounceIdx];
-      speakWord(pet.word, isSlow);
-      const illu = document.getElementById('pr-illustration');
-      illu.classList.remove('animate-jelly');
-      void illu.offsetWidth;
-      illu.classList.add('animate-jelly');
-    }
-
-    function speakSampleSentence() {
-      const pet = PETS_DATA[currentPronounceIdx];
-      speakWord(pet.sentence, false);
-    }
-
-    function nextPronounceWord() {
-      stopRecognitionIfRunning();
-      currentPronounceIdx = (currentPronounceIdx + 1) % PETS_DATA.length;
-      renderPronounceView();
-      speakPronounceTarget(false);
-    }
-
-    function prevPronounceWord() {
-      stopRecognitionIfRunning();
-      currentPronounceIdx = (currentPronounceIdx - 1 + PETS_DATA.length) % PETS_DATA.length;
-      renderPronounceView();
-      speakPronounceTarget(false);
-    }
+    function speakPronounceTarget(isSlow) { speakWord(getActiveItems()[currentPronounceIdx].word, isSlow); }
+    function speakSampleSentence() { speakWord(getActiveItems()[currentPronounceIdx].sentence, false); }
+    function nextPronounceWord() { stopRecognitionIfRunning(); currentPronounceIdx = (currentPronounceIdx + 1) % getActiveItems().length; renderPronounceView(); speakPronounceTarget(false); }
+    function prevPronounceWord() { stopRecognitionIfRunning(); currentPronounceIdx = (currentPronounceIdx - 1 + getActiveItems().length) % getActiveItems().length; renderPronounceView(); speakPronounceTarget(false); }
 
     function resetMicVisuals() {
       isRecording = false;
-      const btn = document.getElementById('btn-mic');
-      const icon = document.getElementById('mic-icon');
-      const text = document.getElementById('mic-btn-text');
-      const wave = document.getElementById('mic-wave');
+      const btn = document.getElementById('btn-mic'), text = document.getElementById('mic-btn-text'), wave = document.getElementById('mic-wave');
       if (!btn) return;
-
-      btn.className = 'btn-3d w-full max-w-[260px] py-3 px-4 rounded-2xl bg-gradient-to-r from-[#E84C3D] to-rose-500 text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-md';
-      icon.textContent = '🎤';
       text.textContent = 'Bấm để nói';
-      wave.classList.add('hidden');
-      wave.classList.remove('flex');
+      wave.classList.add('hidden'); wave.classList.remove('flex');
     }
-
     function stopRecognitionIfRunning() {
-      if (activeRecognition) {
-        try { activeRecognition.abort(); } catch (e) {}
-        activeRecognition = null;
-      }
+      if (activeRecognition) { try { activeRecognition.abort(); } catch (e) {} activeRecognition = null; }
       resetMicVisuals();
     }
-
-    // Nhận diện giọng nói bằng Web Speech API (SpeechRecognition)
     function startPronunciationCheck() {
-      if (isRecording) {
-        stopRecognitionIfRunning();
-        return;
-      }
-
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        showToast('Trình duyệt không hỗ trợ Micro, bé dùng nút mô phỏng bên dưới nhé!');
-        simulatePronunciationSuccess();
-        return;
-      }
-
+      if (isRecording) { stopRecognitionIfRunning(); return; }
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { simulatePronunciationSuccess(); return; }
       try {
         window.speechSynthesis.cancel();
-        const recognition = new SpeechRecognition();
-        activeRecognition = recognition;
-        recognition.lang = 'en-US';
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 3;
-
+        const rec = new SR(); activeRecognition = rec; rec.lang = 'en-US';
         isRecording = true;
-        const btn = document.getElementById('btn-mic');
-        const icon = document.getElementById('mic-icon');
-        const text = document.getElementById('mic-btn-text');
-        const wave = document.getElementById('mic-wave');
-
-        btn.className = 'btn-3d w-full max-w-[260px] py-3 px-4 rounded-2xl bg-slate-800 text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-md ring-4 ring-rose-200';
-        icon.textContent = '⏹️';
-        text.textContent = 'Đang nghe... (Bấm dừng)';
-        wave.classList.remove('hidden');
-        wave.classList.add('flex');
-
-        recognition.onresult = (event) => {
-          const transcripts = [];
-          for (let i = 0; i < event.results[0].length; i++) {
-            transcripts.push(event.results[0][i].transcript.toLowerCase().trim());
-          }
-          evaluatePronunciation(transcripts);
+        document.getElementById('mic-btn-text').textContent = 'Đang nghe...';
+        const wave = document.getElementById('mic-wave'); wave.classList.remove('hidden'); wave.classList.add('flex');
+        rec.onresult = (e) => {
+          const heard = e.results[0][0].transcript.toLowerCase().trim();
+          awardPronunciationStars(3, heard, 'Bé đọc rất to và tự tin! Cô tặng 3 sao!');
         };
-
-        recognition.onerror = (event) => {
-          resetMicVisuals();
-          const resultBox = document.getElementById('pr-result-box');
-          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-            resultBox.innerHTML = `<p class="text-xs font-bold text-amber-600">Chưa cấp quyền Micro. Bé bấm nút <b>"Mô phỏng bé đọc đúng"</b> bên dưới để tiếp tục nhé!</p>`;
-          } else {
-            resultBox.innerHTML = `<p class="text-xs font-bold text-slate-500">Chưa nghe rõ tiếng bé, bé bấm Micro và đọc to lại nhé!</p>`;
-          }
-        };
-
-        recognition.onend = () => {
-          resetMicVisuals();
-        };
-
-        recognition.start();
-      } catch (err) {
-        resetMicVisuals();
-        simulatePronunciationSuccess();
-      }
+        rec.onerror = () => resetMicVisuals();
+        rec.onend = () => resetMicVisuals();
+        rec.start();
+      } catch (e) { resetMicVisuals(); simulatePronunciationSuccess(); }
     }
-
-    // So sánh âm đọc của bé với từ mục tiêu (có độ khoan dung phát âm trẻ em)
-    function evaluatePronunciation(transcripts) {
-      const pet = PETS_DATA[currentPronounceIdx];
-      const target = pet.word.toLowerCase();
-      const heardPrimary = transcripts[0] || '';
-
-      // Bảng từ gần âm thường gặp khi trẻ em phát âm tiếng Anh
-      const phoneticAliases = {
-        cat: ['cat', 'kat', 'cap', 'cut', 'kit', 'ket'],
-        dog: ['dog', 'dock', 'dug', 'log', 'fog', 'dot'],
-        rabbit: ['rabbit', 'rabid', 'habit', 'robert', 'rapid'],
-        hamster: ['hamster', 'hampster', 'ham star', 'hipster', 'monster'],
-        bird: ['bird', 'bert', 'burt', 'bud', 'board', 'birth'],
-        fish: ['fish', 'fitch', 'dish', 'wish', 'fist']
-      };
-
-      const validList = phoneticAliases[pet.id] || [target];
-      const isExact = transcripts.some(t => t.includes(target));
-      const isClose = transcripts.some(t => validList.some(alias => t.includes(alias)));
-
-      // ĐÁNH GIÁ SƯ PHẠM MẦM NON: Khuyến khích trẻ mở miệng phát âm là thành công!
-      if (isExact) {
-        awardPronunciationStars(3, heardPrimary, 'Xuất sắc! Bé phát âm chuẩn và rõ ràng.');
-      } else if (isClose || heardPrimary.length > 0) {
-        // Bé đã rất cố gắng nói, tặng ngay 3 sao và lời khen của cô giáo
-        awardPronunciationStars(3, heardPrimary, 'Rất tốt! Bé đọc to và tự tin.');
-      } else {
-        awardPronunciationStars(2, pet.word, 'Bé đọc gần đúng rồi, cùng luyện lại thêm một lần nhé.');
-      }
-    }
-
     function simulatePronunciationSuccess() {
-      const pet = PETS_DATA[currentPronounceIdx];
-      speakWord(pet.word, false);
-      awardPronunciationStars(3, pet.word, 'Xuất sắc! Bé đọc rất to và rõ ràng.');
+      const item = getActiveItems()[currentPronounceIdx];
+      speakWord(item.word, false);
+      awardPronunciationStars(3, item.word, 'Xuất sắc! Bé đọc rõ lắm!');
     }
-
-    function awardPronunciationStars(stars, heardWord, message) {
-      const pet = PETS_DATA[currentPronounceIdx];
-      const prevStars = pronounceStars[pet.id] || 0;
-      pronounceStars[pet.id] = Math.max(prevStars, stars);
+    function awardPronunciationStars(stars, heard, msg) {
+      const item = getActiveItems()[currentPronounceIdx];
+      pronounceStars[item.id] = Math.max(pronounceStars[item.id] || 0, stars);
       localStorage.setItem('topo_pets_pronounce_stars', JSON.stringify(pronounceStars));
-
-      // Đánh dấu đã thuộc từ vựng này luôn
-      if (!learnedIds.has(pet.id)) {
-        learnedIds.add(pet.id);
-        updateProgressUI();
-        renderGrid();
-      }
-
-      playApplause();
-      launchConfetti();
-      setTimeout(() => speakPraise(), 500);
-
+      if (!learnedIds.has(item.id)) { learnedIds.add(item.id); updateProgressUI(); renderGrid(); }
+      playApplause(); launchConfetti(); setTimeout(() => speakPraise(), 450);
       renderPronounceView();
-      document.getElementById('pr-result-box').innerHTML = `
-        <div class="text-xs font-extrabold text-emerald-600">${message}</div>
-        <div class="text-[11px] font-bold text-slate-500">Bé đã đọc: <span class="text-[#1A2B4C] uppercase">"${heardWord}"</span> (${'⭐'.repeat(stars)})</div>
-      `;
+      document.getElementById('pr-result-box').innerHTML = `<div class="text-[18px] font-bold text-[#15803D]">${msg} ("${heard}")</div>`;
     }
 
     // =========================================================================
-    // 6. BƯỚC 3: BÀI TẬP 1 - ĐỐ VUI (QUIZ)
+    // 6. BƯỚC 3: ĐỐ VUI (QUIZ)
     // =========================================================================
-    function setQuizMode(mode) {
-      quizMode = mode;
-      const btnSound = document.getElementById('qmode-sound');
-      const btnListen = document.getElementById('qmode-listen');
-      const btnImage = document.getElementById('qmode-image');
-
-      [btnSound, btnListen, btnImage].forEach(b => {
-        if (b) b.className = 'btn-lego min-h-[56px] px-4 py-2 rounded-2xl font-display text-[17px] font-bold bg-white text-[#6B21A8] border-2 border-[#D8B4FE] shadow-[0_5px_0_#C084FC]';
+    let quizMode = 'sound', quizScore = 0, currentQuizTarget = null, isQuizLocked = false;
+    function setQuizMode(m) {
+      quizMode = m;
+      ['sound','listen','image'].forEach(k => {
+        const b = document.getElementById(`qmode-${k}`);
+        b.className = k === m
+          ? 'btn-lego min-h-[56px] px-4 py-2 rounded-2xl font-display text-[17px] font-bold bg-[#A855F7] text-white border-2 border-[#9333EA] shadow-[0_5px_0_#6B21A8]'
+          : 'btn-lego min-h-[56px] px-4 py-2 rounded-2xl font-display text-[17px] font-bold bg-white text-[#6B21A8] border-2 border-[#D8B4FE] shadow-[0_5px_0_#C084FC]';
       });
-
-      const activeQM = 'btn-lego min-h-[56px] px-4 py-2 rounded-2xl font-display text-[17px] font-bold bg-[#A855F7] text-white border-2 border-[#9333EA] shadow-[0_5px_0_#6B21A8]';
-      if (mode === 'sound' && btnSound) btnSound.className = activeQM;
-      else if (mode === 'listen' && btnListen) btnListen.className = activeQM;
-      else if (mode === 'image' && btnImage) btnImage.className = activeQM;
       generateQuizQuestion();
     }
-
     function generateQuizQuestion() {
       isQuizLocked = false;
       document.getElementById('quiz-feedback').innerHTML = '';
+      const items = [...getActiveItems()].sort(() => Math.random() - 0.5);
+      currentQuizTarget = items[0];
+      const opts = items.slice(0, 4).sort(() => Math.random() - 0.5);
 
-      // Chọn ngẫu nhiên 1 đáp án đúng
-      const shuffled = [...PETS_DATA].sort(() => Math.random() - 0.5);
-      currentQuizTarget = shuffled[0];
-      // Lấy 4 lựa chọn (gồm đáp án đúng + 3 đáp án nhiễu) và xáo trộn
-      const options = shuffled.slice(0, 4).sort(() => Math.random() - 0.5);
-
-      const audioPrompt = document.getElementById('quiz-audio-prompt');
-      const imagePrompt = document.getElementById('quiz-image-prompt');
-      const instruction = document.getElementById('quiz-instruction');
-
-      if (quizMode === 'sound') {
-        instruction.textContent = 'Lắng nghe tiếng kêu và chọn con vật phù hợp';
-        audioPrompt.classList.remove('hidden');
-        audioPrompt.classList.add('flex');
-        imagePrompt.classList.add('hidden');
-        imagePrompt.classList.remove('flex');
-        document.querySelector('#quiz-audio-prompt span.text-3xl').textContent = '🐾';
-        setTimeout(() => playQuizAudio(), 250);
-      } else if (quizMode === 'listen') {
-        instruction.textContent = 'Nghe phát âm tiếng Anh và chọn con vật phù hợp';
-        audioPrompt.classList.remove('hidden');
-        audioPrompt.classList.add('flex');
-        imagePrompt.classList.add('hidden');
-        imagePrompt.classList.remove('flex');
-        document.querySelector('#quiz-audio-prompt span.text-3xl').textContent = '🔊';
-        setTimeout(() => playQuizAudio(), 250);
+      const ap = document.getElementById('quiz-audio-prompt'), ip = document.getElementById('quiz-image-prompt'), ins = document.getElementById('quiz-instruction');
+      if (quizMode === 'sound' || quizMode === 'listen') {
+        ins.textContent = quizMode === 'sound' ? 'Lắng nghe âm thanh và chọn hình đúng nhé!' : 'Nghe đọc tiếng Anh và chọn hình đúng nhé!';
+        ap.classList.remove('hidden'); ap.classList.add('flex');
+        ip.classList.add('hidden'); ip.classList.remove('flex');
+        setTimeout(playQuizAudio, 250);
       } else {
-        instruction.textContent = 'Nhìn hình ảnh và chọn từ tiếng Anh đúng';
-        imagePrompt.classList.remove('hidden');
-        imagePrompt.classList.add('flex');
-        audioPrompt.classList.add('hidden');
-        audioPrompt.classList.remove('flex');
+        ins.textContent = 'Nhìn hình và chọn từ tiếng Anh đúng nhé!';
+        ip.classList.remove('hidden'); ip.classList.add('flex');
+        ap.classList.add('hidden'); ap.classList.remove('flex');
         document.getElementById('quiz-target-svg').innerHTML = currentQuizTarget.svg;
       }
 
-      const optionsContainer = document.getElementById('quiz-options');
-      optionsContainer.innerHTML = '';
-
-      options.forEach(opt => {
+      const container = document.getElementById('quiz-options');
+      container.innerHTML = '';
+      opts.forEach(opt => {
         const btn = document.createElement('button');
-        btn.className = 'btn-lego min-h-[130px] bg-white hover:bg-[#F0F9FF] border-4 border-[#BAE6FD] shadow-[0_7px_0_#7DD3FC] active:shadow-[0_2px_0_#7DD3FC] rounded-3xl p-4 flex flex-col items-center justify-center';
-
+        btn.className = 'btn-lego min-h-[130px] bg-white hover:bg-[#F0F9FF] border-4 border-[#BAE6FD] shadow-[0_7px_0_#7DD3FC] rounded-3xl p-4 flex flex-col items-center justify-center';
         if (quizMode === 'sound' || quizMode === 'listen') {
-          btn.innerHTML = `
-            <div class="w-20 h-20 mb-1.5 pointer-events-none">${opt.svg}</div>
-            <span class="font-display text-[18px] font-bold text-[#14532D] bg-[#DCFCE7] px-3 py-0.5 rounded-xl mt-1">Con ${opt.meaning}</span>
-          `;
+          btn.innerHTML = `<div class="w-24 h-24 pointer-events-none">${opt.svg}</div><span class="font-display text-[18px] font-bold text-[#14532D] bg-[#DCFCE7] px-3 py-0.5 rounded-xl mt-1">${opt.meaning}</span>`;
         } else {
-          btn.innerHTML = `
-            <span class="font-display font-bold text-3xl text-[#FF6B35] leading-tight">${opt.word}</span>
-            <span class="text-xs font-semibold text-slate-500 mt-0.5">${opt.ipa}</span>
-          `;
+          btn.innerHTML = `<span class="font-display font-bold text-3xl text-[#FF6B35]">${opt.word}</span>`;
         }
-
-        btn.addEventListener('click', () => handleQuizAnswer(opt, btn));
-        optionsContainer.appendChild(btn);
+        btn.onclick = () => handleQuizAnswer(opt, btn);
+        container.appendChild(btn);
       });
     }
-
     function playQuizAudio() {
       if (!currentQuizTarget) return;
-      if (quizMode === 'sound') {
-        playAnimalSound(currentQuizTarget.id);
-      } else {
-        speakWord(currentQuizTarget.word, false);
-      }
+      if (quizMode === 'sound') playAnimalSound(currentQuizTarget.id);
+      else speakWord(currentQuizTarget.word, false);
     }
-
-    function handleQuizAnswer(selected, btnEl) {
+    function handleQuizAnswer(sel, btn) {
       if (isQuizLocked) return;
-      const feedbackEl = document.getElementById('quiz-feedback');
-
-      if (selected.id === currentQuizTarget.id) {
-        isQuizLocked = true;
-        quizScore += 10;
+      const fb = document.getElementById('quiz-feedback');
+      if (sel.id === currentQuizTarget.id) {
+        isQuizLocked = true; quizScore += 10;
         document.getElementById('quiz-score').textContent = `${quizScore} điểm`;
-
-        btnEl.classList.remove('border-slate-200', 'bg-white');
-        btnEl.classList.add('border-emerald-500', 'bg-emerald-50', 'ring-4', 'ring-emerald-200');
-
-        feedbackEl.innerHTML = `<span class="text-emerald-600 flex items-center gap-1">Chính xác! "${currentQuizTarget.word}" (${currentQuizTarget.meaning})</span>`;
-
-        playAnimalSound(currentQuizTarget.id);
-        playApplause();
-        launchConfetti();
-        setTimeout(() => speakWord(currentQuizTarget.word, false), 400);
-
-        // Tự động đánh dấu đã thuộc nếu trả lời đúng
-        if (!learnedIds.has(currentQuizTarget.id)) {
-          learnedIds.add(currentQuizTarget.id);
-          updateProgressUI();
-          renderGrid();
-        }
-
-        setTimeout(() => {
-          generateQuizQuestion();
-        }, 1600);
+        btn.classList.add('border-[#22C55E]', 'bg-[#DCFCE7]');
+        fb.innerHTML = `<span class="text-[#15803D]">Chính xác! "${currentQuizTarget.word}" (${currentQuizTarget.meaning})</span>`;
+        playApplause(); launchConfetti(); setTimeout(() => speakWord(currentQuizTarget.word), 400);
+        if (!learnedIds.has(currentQuizTarget.id)) { learnedIds.add(currentQuizTarget.id); updateProgressUI(); renderGrid(); }
+        setTimeout(generateQuizQuestion, 1600);
       } else {
-        btnEl.classList.remove('border-slate-200');
-        btnEl.classList.add('border-rose-400', 'bg-rose-50', 'animate-jelly');
-        feedbackEl.innerHTML = `<span class="text-rose-500">Chưa chính xác, bé hãy thử lại nhé.</span>`;
+        btn.classList.add('animate-shake', 'border-[#F43F5E]', 'bg-[#FFE4E6]');
+        fb.innerHTML = `<span class="text-[#BE123C]">Bé thử chọn hình khác nhé!</span>`;
         playSoundEffect('wrong');
       }
     }
 
     // =========================================================================
-    // 7. BƯỚC 4: BÀI TẬP 2 - NỐI TỪ (WORD MATCHING GAME)
+    // 7. BƯỚC 4: NỐI TỪ (MATCH)
     // =========================================================================
+    let matchLeftOrder = [], matchRightOrder = [], selectedLeftId = null, selectedRightId = null, matchedPairs = [], showMatchHint = false, matchStartTime = null;
     function initMatchGame() {
-      selectedLeftId = null;
-      selectedRightId = null;
-      matchedPairs = [];
-      matchStartTime = Date.now();
-
-      // Trộn ngẫu nhiên 2 cột độc lập để không nằm ngang hàng nhau
-      matchLeftOrder = [...PETS_DATA].sort(() => Math.random() - 0.5);
-      matchRightOrder = [...PETS_DATA].sort(() => Math.random() - 0.5);
-      // Đảm bảo thứ tự 2 cột không trùng hệt nhau
-      if (matchLeftOrder.every((item, idx) => item.id === matchRightOrder[idx].id)) {
-        matchRightOrder.push(matchRightOrder.shift());
-      }
-
+      selectedLeftId = null; selectedRightId = null; matchedPairs = []; matchStartTime = Date.now();
+      const items = getActiveItems();
+      matchLeftOrder = [...items].sort(() => Math.random() - 0.5);
+      matchRightOrder = [...items].sort(() => Math.random() - 0.5);
       document.getElementById('match-complete-card').classList.add('hidden');
-      document.getElementById('match-counter').textContent = `Đã nối: 0/${PETS_DATA.length} cặp`;
+      document.getElementById('match-counter').textContent = `0/${items.length} cặp`;
       renderMatchBoard();
     }
-
-    function toggleMatchHint() {
-      showMatchHint = !showMatchHint;
-      const btn = document.getElementById('btn-match-hint');
-      btn.className = showMatchHint
-        ? 'px-2.5 py-1 rounded-xl text-[11px] font-extrabold bg-amber-400 text-slate-950 shadow-sm transition'
-        : 'px-2.5 py-1 rounded-xl text-[11px] font-extrabold bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition';
-      renderMatchBoard();
-    }
-
+    function toggleMatchHint() { showMatchHint = !showMatchHint; renderMatchBoard(); }
     function renderMatchBoard() {
-      const leftCol = document.getElementById('match-left-col');
-      const rightCol = document.getElementById('match-right-col');
-      leftCol.innerHTML = '';
-      rightCol.innerHTML = '';
-
-      // Render cột trái (Hình con vật)
-      matchLeftOrder.forEach(pet => {
-        const isMatched = matchedPairs.some(p => p.id === pet.id);
-        const isSelected = selectedLeftId === pet.id;
-
-        const card = document.createElement('div');
-        card.id = `match-left-${pet.id}`;
-        card.dataset.side = 'left';
-        card.dataset.id = pet.id;
-        card.className = `btn-lego relative rounded-2xl border-2 p-3 flex items-center justify-between cursor-pointer select-none min-h-[72px] ${
-          isMatched
-            ? 'bg-emerald-50 border-emerald-400 opacity-90'
-            : isSelected
-              ? 'bg-amber-50 border-[#E84C3D] ring-4 ring-orange-200 scale-[1.03]'
-              : 'bg-white border-slate-200 hover:border-sky-300 shadow-sm'
-        }`;
-
-        card.innerHTML = `
-          <div class="w-12 h-12 shrink-0">${pet.svg}</div>
-          <span class="text-xs font-extrabold text-slate-400">🔊</span>
-          <!-- Điểm neo nối dây bên phải của thẻ trái -->
-          <span class="w-3.5 h-3.5 rounded-full border-2 ${
-            isMatched ? 'bg-emerald-500 border-emerald-600' : isSelected ? 'bg-[#E84C3D] border-rose-700' : 'bg-slate-200 border-slate-400'
-          } -mr-3.5 shrink-0"></span>
-          ${isMatched ? '<span class="absolute -top-1.5 -left-1.5 bg-emerald-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow">✓</span>' : ''}
-        `;
-
-        card.addEventListener('click', () => handleMatchCardTap('left', pet.id));
-        setupDragConnect(card, 'left', pet.id);
-        leftCol.appendChild(card);
+      const lc = document.getElementById('match-left-col'), rc = document.getElementById('match-right-col');
+      lc.innerHTML = ''; rc.innerHTML = '';
+      matchLeftOrder.forEach(item => {
+        const m = matchedPairs.some(p => p.id === item.id), s = selectedLeftId === item.id;
+        const c = document.createElement('div');
+        c.id = `match-left-${item.id}`;
+        c.className = `btn-lego rounded-2xl border-2 p-2.5 flex items-center justify-between cursor-pointer min-h-[72px] ${m ? 'bg-[#DCFCE7] border-[#22C55E]' : s ? 'bg-[#FEF08A] border-[#FF6B35]' : 'bg-white border-[#BAE6FD] shadow-[0_4px_0_#7DD3FC]'}`;
+        c.innerHTML = `<div class="w-14 h-14">${item.svg}</div><span class="text-xl">🔊</span>`;
+        c.onclick = () => handleMatchTap('left', item.id);
+        lc.appendChild(c);
       });
-
-      // Render cột phải (Từ tiếng Anh + IPA)
-      matchRightOrder.forEach(pet => {
-        const isMatched = matchedPairs.some(p => p.id === pet.id);
-        const isSelected = selectedRightId === pet.id;
-
-        const card = document.createElement('div');
-        card.id = `match-right-${pet.id}`;
-        card.dataset.side = 'right';
-        card.dataset.id = pet.id;
-        card.className = `btn-lego relative rounded-2xl border-2 px-4 py-2 flex items-center justify-between cursor-pointer select-none min-h-[72px] ${
-          isMatched
-            ? 'bg-emerald-50 border-emerald-400 opacity-90'
-            : isSelected
-              ? 'bg-sky-50 border-sky-500 ring-4 ring-sky-200 scale-[1.03]'
-              : 'bg-white border-slate-200 hover:border-sky-300 shadow-sm'
-        }`;
-
-        card.innerHTML = `
-          <!-- Điểm neo nối dây bên trái của thẻ phải -->
-          <span class="w-3.5 h-3.5 rounded-full border-2 ${
-            isMatched ? 'bg-emerald-500 border-emerald-600' : isSelected ? 'bg-sky-500 border-sky-700' : 'bg-slate-200 border-slate-400'
-          } -ml-4.5 mr-2 shrink-0"></span>
-          <div class="flex-1 text-center">
-            <div class="font-display font-bold text-2xl text-[#FF6B35] leading-tight">${pet.word}</div>
-            <div class="text-[11px] font-bold text-slate-400 leading-tight">
-              ${showMatchHint ? `<span class="text-amber-700 font-extrabold">${pet.meaning}</span>` : pet.ipa}
-            </div>
-          </div>
-          ${isMatched ? '<span class="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow">✓</span>' : ''}
-        `;
-
-        card.addEventListener('click', () => handleMatchCardTap('right', pet.id));
-        setupDragConnect(card, 'right', pet.id);
-        rightCol.appendChild(card);
+      matchRightOrder.forEach(item => {
+        const m = matchedPairs.some(p => p.id === item.id), s = selectedRightId === item.id;
+        const c = document.createElement('div');
+        c.id = `match-right-${item.id}`;
+        c.className = `btn-lego rounded-2xl border-2 px-4 py-2 flex items-center justify-center cursor-pointer min-h-[72px] ${m ? 'bg-[#DCFCE7] border-[#22C55E]' : s ? 'bg-[#E0F2FE] border-[#0EA5E9]' : 'bg-white border-[#BAE6FD] shadow-[0_4px_0_#7DD3FC]'}`;
+        c.innerHTML = `<div class="text-center"><div class="font-display font-bold text-2xl text-[#FF6B35]">${item.word}</div>${showMatchHint ? `<div class="text-sm font-bold text-[#14532D]">${item.meaning}</div>` : ''}</div>`;
+        c.onclick = () => handleMatchTap('right', item.id);
+        rc.appendChild(c);
       });
-
-      // Vẽ lại các đường nối đã khớp sau khi DOM cập nhật
       requestAnimationFrame(drawAllMatchedLines);
     }
-
-    function handleMatchCardTap(side, id) {
+    function handleMatchTap(side, id) {
       if (matchedPairs.some(p => p.id === id)) return;
-      const pet = PETS_DATA.find(p => p.id === id);
-      if (pet) speakWord(pet.word, false);
-
-      if (side === 'left') {
-        selectedLeftId = selectedLeftId === id ? null : id;
-      } else {
-        selectedRightId = selectedRightId === id ? null : id;
-      }
-
+      const item = getActiveItems().find(x => x.id === id);
+      if (item) speakWord(item.word);
+      if (side === 'left') selectedLeftId = selectedLeftId === id ? null : id;
+      else selectedRightId = selectedRightId === id ? null : id;
       if (selectedLeftId && selectedRightId) {
-        verifyMatchPair(selectedLeftId, selectedRightId);
-      } else {
-        renderMatchBoard();
-      }
-    }
-
-    function verifyMatchPair(leftId, rightId) {
-      if (leftId === rightId) {
-        // Nối đúng!
-        const pet = PETS_DATA.find(p => p.id === leftId);
-        matchedPairs.push({ id: leftId, lineColor: pet.lineColor });
-        selectedLeftId = null;
-        selectedRightId = null;
-
-        playSoundEffect('correct');
-        document.getElementById('match-counter').textContent = `Đã nối: ${matchedPairs.length}/${PETS_DATA.length} cặp`;
-
-        if (!learnedIds.has(leftId)) {
-          learnedIds.add(leftId);
-          updateProgressUI();
-          renderGrid();
-        }
-
-        renderMatchBoard();
-
-        // Kiểm tra hoàn thành 6/6 cặp
-        if (matchedPairs.length === PETS_DATA.length) {
-          const elapsedSec = Math.max(3, Math.round((Date.now() - matchStartTime) / 1000));
-          document.getElementById('match-summary-text').textContent = `Thời gian hoàn thành: ${elapsedSec} giây • Tuyệt vời!`;
-          document.getElementById('match-complete-card').classList.remove('hidden');
-          playApplause();
-          launchConfetti();
-          setTimeout(() => speakPraise(), 500);
-        }
-      } else {
-        // Nối sai -> Rung nhẹ và đặt lại
-        playSoundEffect('wrong');
-        const leftEl = document.getElementById(`match-left-${leftId}`);
-        const rightEl = document.getElementById(`match-right-${rightId}`);
-        if (leftEl) leftEl.classList.add('animate-shake', 'border-rose-500', 'bg-rose-50');
-        if (rightEl) rightEl.classList.add('animate-shake', 'border-rose-500', 'bg-rose-50');
-
-        setTimeout(() => {
-          selectedLeftId = null;
-          selectedRightId = null;
+        if (selectedLeftId === selectedRightId) {
+          matchedPairs.push({ id: selectedLeftId, lineColor: item.lineColor });
+          selectedLeftId = null; selectedRightId = null;
+          playSoundEffect('correct');
+          document.getElementById('match-counter').textContent = `${matchedPairs.length}/${getActiveItems().length} cặp`;
+          if (!learnedIds.has(item.id)) { learnedIds.add(item.id); updateProgressUI(); renderGrid(); }
           renderMatchBoard();
-        }, 420);
-      }
-    }
-
-    // Hỗ trợ kéo-thả (Drag & Touch) nối dây trực tiếp giữa 2 cột
-    function setupDragConnect(cardEl, side, id) {
-      const onPointerDown = (e) => {
-        if (matchedPairs.some(p => p.id === id)) return;
-        dragStartSide = side;
-        dragStartId = id;
-      };
-      cardEl.addEventListener('pointerdown', onPointerDown);
-    }
-
-    window.addEventListener('pointermove', (e) => {
-      if (!dragStartSide || !dragStartId || currentTab !== 'match') return;
-      const board = document.getElementById('match-board');
-      const svg = document.getElementById('match-lines-svg');
-      const startEl = document.getElementById(`match-${dragStartSide}-${dragStartId}`);
-      if (!board || !svg || !startEl) return;
-
-      const boardRect = board.getBoundingClientRect();
-      const startRect = startEl.getBoundingClientRect();
-      const x1 = (dragStartSide === 'left' ? startRect.right : startRect.left) - boardRect.left;
-      const y1 = startRect.top + startRect.height / 2 - boardRect.top;
-      const x2 = e.clientX - boardRect.left;
-      const y2 = e.clientY - boardRect.top;
-
-      if (!tempDragLine) {
-        tempDragLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        tempDragLine.setAttribute('stroke', '#E84C3D');
-        tempDragLine.setAttribute('stroke-width', '4');
-        tempDragLine.setAttribute('stroke-dasharray', '6 4');
-        tempDragLine.setAttribute('fill', 'none');
-        tempDragLine.setAttribute('stroke-linecap', 'round');
-        svg.appendChild(tempDragLine);
-      }
-      const cx = (x1 + x2) / 2;
-      tempDragLine.setAttribute('d', `M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`);
-    });
-
-    window.addEventListener('pointerup', (e) => {
-      if (tempDragLine) {
-        tempDragLine.remove();
-        tempDragLine = null;
-      }
-      if (!dragStartSide || !dragStartId) return;
-
-      const targetEl = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-side]');
-      if (targetEl) {
-        const endSide = targetEl.dataset.side;
-        const endId = targetEl.dataset.id;
-        if (endSide && endSide !== dragStartSide && !matchedPairs.some(p => p.id === endId)) {
-          const leftId = dragStartSide === 'left' ? dragStartId : endId;
-          const rightId = dragStartSide === 'right' ? dragStartId : endId;
-          verifyMatchPair(leftId, rightId);
+          if (matchedPairs.length === getActiveItems().length) {
+            document.getElementById('match-complete-card').classList.remove('hidden');
+            playApplause(); launchConfetti(); speakPraise();
+          }
+        } else {
+          playSoundEffect('wrong');
+          selectedLeftId = null; selectedRightId = null;
+          renderMatchBoard();
         }
-      }
-      dragStartSide = null;
-      dragStartId = null;
-    });
-
-    // Vẽ đường cong SVG nối các cặp đã ghép đúng
+      } else renderMatchBoard();
+    }
     function drawAllMatchedLines() {
-      const board = document.getElementById('match-board');
-      const svg = document.getElementById('match-lines-svg');
+      const board = document.getElementById('match-board'), svg = document.getElementById('match-lines-svg');
       if (!board || !svg) return;
-
       svg.innerHTML = '';
-      const boardRect = board.getBoundingClientRect();
-      if (boardRect.width === 0) return;
-
-      matchedPairs.forEach(pair => {
-        const leftEl = document.getElementById(`match-left-${pair.id}`);
-        const rightEl = document.getElementById(`match-right-${pair.id}`);
-        if (!leftEl || !rightEl) return;
-
-        const lRect = leftEl.getBoundingClientRect();
-        const rRect = rightEl.getBoundingClientRect();
-
-        const x1 = lRect.right - boardRect.left;
-        const y1 = lRect.top + lRect.height / 2 - boardRect.top;
-        const x2 = rRect.left - boardRect.left;
-        const y2 = rRect.top + rRect.height / 2 - boardRect.top;
-        const cx = (x1 + x2) / 2;
-
+      const br = board.getBoundingClientRect(); if (!br.width) return;
+      matchedPairs.forEach(p => {
+        const l = document.getElementById(`match-left-${p.id}`), r = document.getElementById(`match-right-${p.id}`);
+        if (!l || !r) return;
+        const lr = l.getBoundingClientRect(), rr = r.getBoundingClientRect();
+        const x1 = lr.right - br.left, y1 = lr.top + lr.height/2 - br.top, x2 = rr.left - br.left, y2 = rr.top + rr.height/2 - br.top, cx = (x1+x2)/2;
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute('d', `M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`);
-        path.setAttribute('stroke', pair.lineColor || '#06D6A0');
-        path.setAttribute('stroke-width', '4.5');
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke', p.lineColor || '#22C55E'); path.setAttribute('stroke-width', '5'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round');
         svg.appendChild(path);
       });
     }
 
-    window.addEventListener('resize', () => {
-      if (currentTab === 'match') drawAllMatchedLines();
-    });
-
     // =========================================================================
-    // 8. BƯỚC 5: BÀI TẬP 2 - GHÉP TỪ ĐƠN GIẢN THÀNH CÂU ("It's a [pet].")
+    // 8. BƯỚC 5: GHÉP CÂU (SENTENCE BUILDER)
     // =========================================================================
-    function initSentenceGame() {
-      sentenceQueue = [...PETS_DATA].sort(() => Math.random() - 0.5);
-      currentSentenceIdx = 0;
-      sentenceCompletedCount = 0;
-      loadSentenceChallenge();
-    }
-
+    let sentenceQueue = [], currentSentenceIdx = 0, sentenceBankTiles = [], sentenceChosenTiles = [], isSentenceSolved = false;
+    function initSentenceGame() { sentenceQueue = [...getActiveItems()].sort(() => Math.random() - 0.5); currentSentenceIdx = 0; loadSentenceChallenge(); }
     function loadSentenceChallenge() {
-      isSentenceSolved = false;
-      sentenceChosenTiles = [];
-      const targetPet = sentenceQueue[currentSentenceIdx];
-
-      document.getElementById('sentence-progress-text').textContent =
-        `Câu ${currentSentenceIdx + 1}/${sentenceQueue.length} • ${sentenceCompletedCount} sao`;
-      document.getElementById('sentence-pet-svg').innerHTML = targetPet.svg;
-      document.getElementById('sentence-pet-hint').textContent = `con ${targetPet.meaning}`;
-      document.getElementById('dialogue-answer-bubble').textContent = "It's a ...";
-      document.getElementById('dialogue-answer-sub').textContent = 'Chạm từ bên dưới để ghép!';
+      isSentenceSolved = false; sentenceChosenTiles = [];
+      const item = sentenceQueue[currentSentenceIdx];
+      document.getElementById('sentence-progress-text').textContent = `Câu ${currentSentenceIdx + 1}/${sentenceQueue.length}`;
+      document.getElementById('sentence-question-en').textContent = item.qEn;
+      document.getElementById('sentence-question-vi').textContent = item.qVi;
+      document.getElementById('sentence-pet-svg').innerHTML = item.svg;
+      document.getElementById('sentence-pet-hint').textContent = item.meaning;
+      document.getElementById('dialogue-answer-bubble').textContent = `${item.aTemplate[0]} ...`;
       document.getElementById('sentence-feedback').innerHTML = '';
-
-      const btnCheck = document.getElementById('btn-check-sentence');
-      const btnNext = document.getElementById('btn-next-sentence');
-      btnCheck.classList.remove('hidden');
-      btnNext.classList.add('hidden');
-
-      // Tạo các mảnh từ cần ghép: ["It's", "a", targetPet.word] + 1 từ nhiễu để bé chọn chính xác
-      const distractorPet = PETS_DATA.find(p => p.id !== targetPet.id) || PETS_DATA[0];
-      const rawWords = ["It's", 'a', targetPet.word, distractorPet.word];
-      sentenceBankTiles = rawWords
-        .sort(() => Math.random() - 0.5)
-        .map((word, idx) => ({
-          uid: `tile-${idx}-${word}`,
-          text: word,
-          isUsed: false
-        }));
-
+      document.getElementById('btn-check-sentence').classList.remove('hidden');
+      document.getElementById('btn-next-sentence').classList.add('hidden');
+      const dist = getActiveItems().find(x => x.id !== item.id) || item;
+      sentenceBankTiles = [...item.aTemplate, dist.word].sort(() => Math.random() - 0.5).map((t, i) => ({ uid: `st-${i}-${t}`, text: t, isUsed: false }));
       renderSentenceWorkspace();
-      setTimeout(() => speakWord('What animal is it?', false), 250);
     }
-
     function renderSentenceWorkspace() {
-      const slotsEl = document.getElementById('sentence-slots');
-      const bankEl = document.getElementById('sentence-word-bank');
-      slotsEl.innerHTML = '';
-      bankEl.innerHTML = '';
-
-      // Render 3 ô trống ghép câu
+      const slots = document.getElementById('sentence-slots'), bank = document.getElementById('sentence-word-bank');
+      slots.innerHTML = ''; bank.innerHTML = '';
       for (let i = 0; i < 3; i++) {
-        const chosen = sentenceChosenTiles[i];
-        const slotBtn = document.createElement('button');
-
-        if (chosen) {
-          slotBtn.className = `btn-lego min-h-[60px] rounded-2xl font-display font-bold text-[22px] border-2 flex items-center justify-center ${
-            isSentenceSolved
-              ? 'bg-emerald-100 border-emerald-500 text-emerald-900'
-              : 'bg-amber-50 border-amber-400 text-[#1A2B4C] hover:bg-rose-50 hover:border-rose-300'
-          }`;
-          slotBtn.textContent = i === 2 ? `${chosen.text}.` : chosen.text;
-          slotBtn.onclick = () => removeSentenceTileAt(i);
+        const c = sentenceChosenTiles[i], btn = document.createElement('button');
+        if (c) {
+          btn.className = `btn-lego min-h-[60px] rounded-2xl font-display font-bold text-[22px] border-2 ${isSentenceSolved ? 'bg-[#DCFCE7] border-[#22C55E] text-[#14532D]' : 'bg-[#FEF08A] border-[#FACC15] text-[#451A03]'}`;
+          btn.textContent = c.text;
+          btn.onclick = () => { if (!isSentenceSolved) { sentenceChosenTiles.splice(i, 1); const b = sentenceBankTiles.find(x => x.uid === c.uid); if (b) b.isUsed = false; renderSentenceWorkspace(); } };
         } else {
-          slotBtn.className =
-            'min-h-[60px] rounded-2xl border-2 border-dashed border-[#7DD3FC] bg-[#F0F9FF] text-[#0284C7] font-display font-bold text-[18px] flex items-center justify-center';
-          slotBtn.textContent = `Từ ${i + 1}`;
-          slotBtn.disabled = true;
+          btn.className = 'min-h-[60px] rounded-2xl border-2 border-dashed border-[#7DD3FC] bg-[#F0F9FF] text-[#0284C7] font-display font-bold text-[18px]';
+          btn.textContent = `Từ ${i + 1}`;
         }
-        slotsEl.appendChild(slotBtn);
+        slots.appendChild(btn);
       }
-
-      // Cập nhật bong bóng thoại trực tiếp theo từ bé đang chọn
-      const bubbleEl = document.getElementById('dialogue-answer-bubble');
-      if (sentenceChosenTiles.length === 0) {
-        bubbleEl.textContent = "It's a ...";
-      } else {
-        const built = sentenceChosenTiles.map(t => t.text).join(' ');
-        bubbleEl.textContent = sentenceChosenTiles.length === 3 ? `${built}.` : `${built} ...`;
-      }
-
-      // Render ngân hàng các mảnh từ bên dưới
-      sentenceBankTiles.forEach(tile => {
+      sentenceBankTiles.forEach(t => {
         const btn = document.createElement('button');
-        btn.disabled = tile.isUsed || isSentenceSolved;
-        btn.className = tile.isUsed
-          ? 'min-h-[60px] px-6 py-2.5 rounded-2xl border-2 border-[#E2E8F0] bg-[#F1F5F9] text-[#94A3B8] font-display font-bold text-[20px] cursor-not-allowed'
-          : 'btn-lego min-h-[60px] px-6 py-2.5 rounded-2xl border-2 border-[#38BDF8] bg-[#E0F2FE] hover:bg-[#BAE6FD] shadow-[0_5px_0_#0284C7] active:shadow-[0_2px_0_#0284C7] text-[#0C4A6E] font-display font-bold text-[22px]';
-        btn.textContent = tile.text;
-        btn.onclick = () => pickSentenceTile(tile.uid);
-        bankEl.appendChild(btn);
+        btn.disabled = t.isUsed || isSentenceSolved;
+        btn.className = t.isUsed
+          ? 'min-h-[60px] px-6 py-2.5 rounded-2xl border-2 border-[#E2E8F0] bg-[#F1F5F9] text-[#94A3B8] font-display font-bold text-[20px]'
+          : 'btn-lego min-h-[60px] px-6 py-2.5 rounded-2xl border-2 border-[#38BDF8] bg-[#E0F2FE] shadow-[0_5px_0_#0284C7] text-[#0C4A6E] font-display font-bold text-[22px]';
+        btn.textContent = t.text;
+        btn.onclick = () => { t.isUsed = true; sentenceChosenTiles.push(t); speakWord(t.text); renderSentenceWorkspace(); if (sentenceChosenTiles.length === 3) setTimeout(checkBuiltSentence, 300); };
+        bank.appendChild(btn);
       });
     }
-
-    function pickSentenceTile(uid) {
-      if (isSentenceSolved || sentenceChosenTiles.length >= 3) return;
-      const tile = sentenceBankTiles.find(t => t.uid === uid);
-      if (!tile || tile.isUsed) return;
-
-      tile.isUsed = true;
-      sentenceChosenTiles.push(tile);
-      speakWord(tile.text, false);
-      document.getElementById('sentence-feedback').innerHTML = '';
-      renderSentenceWorkspace();
-
-      // Tự động kiểm tra ngay khi bé chọn đủ 3 từ
-      if (sentenceChosenTiles.length === 3) {
-        setTimeout(() => checkBuiltSentence(), 350);
-      }
-    }
-
-    function removeSentenceTileAt(slotIndex) {
-      if (isSentenceSolved) return;
-      const removed = sentenceChosenTiles.splice(slotIndex, 1)[0];
-      if (removed) {
-        const bankTile = sentenceBankTiles.find(t => t.uid === removed.uid);
-        if (bankTile) bankTile.isUsed = false;
-      }
-      document.getElementById('sentence-feedback').innerHTML = '';
-      renderSentenceWorkspace();
-    }
-
-    function clearSentenceSlots() {
-      if (isSentenceSolved) return;
-      sentenceChosenTiles = [];
-      sentenceBankTiles.forEach(t => (t.isUsed = false));
-      document.getElementById('sentence-feedback').innerHTML = '';
-      renderSentenceWorkspace();
-    }
-
+    function clearSentenceSlots() { sentenceChosenTiles = []; sentenceBankTiles.forEach(t => t.isUsed = false); renderSentenceWorkspace(); }
     function checkBuiltSentence() {
-      const feedbackEl = document.getElementById('sentence-feedback');
-      if (sentenceChosenTiles.length < 3) {
-        feedbackEl.innerHTML = `<span class="text-amber-600">Bé hãy chọn đủ 3 từ để ghép thành câu nhé!</span>`;
-        playSoundEffect('wrong');
-        return;
-      }
-
-      const targetPet = sentenceQueue[currentSentenceIdx];
-      const expectedWords = ["It's", 'a', targetPet.word];
-      const userWords = sentenceChosenTiles.map(t => t.text);
-      const isCorrect = expectedWords.every((w, idx) => w === userWords[idx]);
-
-      if (isCorrect) {
+      const item = sentenceQueue[currentSentenceIdx], fb = document.getElementById('sentence-feedback');
+      if (sentenceChosenTiles.length < 3) { fb.innerHTML = '<span class="text-[#D97706]">Bé chọn đủ 3 từ nhé!</span>'; return; }
+      const ok = item.aTemplate.every((w, i) => w === sentenceChosenTiles[i].text);
+      if (ok) {
         isSentenceSolved = true;
-        sentenceCompletedCount++;
-        const fullSentence = `It's a ${targetPet.word}.`;
-
-        document.getElementById('sentence-progress-text').textContent =
-          `Câu ${currentSentenceIdx + 1}/${sentenceQueue.length} • ${sentenceCompletedCount} sao`;
-        document.getElementById('dialogue-answer-sub').textContent = `Đó là một con ${targetPet.meaning}!`;
-        feedbackEl.innerHTML = `<span class="text-emerald-600">Tuyệt vời! "${fullSentence}" (Đó là một con ${targetPet.meaning})</span>`;
-
-        playApplause();
-        playAnimalSound(targetPet.id);
-        speakWord(fullSentence, false);
-        launchConfetti();
-        setTimeout(() => speakPraise(), 600);
-        renderSentenceWorkspace();
-
-        if (!learnedIds.has(targetPet.id)) {
-          learnedIds.add(targetPet.id);
-          updateProgressUI();
-          renderGrid();
-        }
-
+        const full = item.aTemplate.join(' ');
+        document.getElementById('dialogue-answer-bubble').textContent = full;
+        fb.innerHTML = `<span class="text-[#15803D]">Tuyệt vời! "${full}"</span>`;
+        playApplause(); speakWord(full); launchConfetti();
         document.getElementById('btn-check-sentence').classList.add('hidden');
-        const btnNext = document.getElementById('btn-next-sentence');
-        btnNext.classList.remove('hidden');
-        btnNext.innerHTML =
-          currentSentenceIdx < sentenceQueue.length - 1
-            ? '<span>Câu tiếp theo &rarr;</span>'
-            : '<span>Làm lại bộ câu ghép</span>';
+        document.getElementById('btn-next-sentence').classList.remove('hidden');
       } else {
         playSoundEffect('wrong');
-        feedbackEl.innerHTML = `<span class="text-rose-500">Chưa đúng thứ tự, gợi ý: <b>It's → a → ${targetPet.word}</b></span>`;
-        const slotsEl = document.getElementById('sentence-slots');
-        slotsEl.classList.add('animate-shake');
-        setTimeout(() => slotsEl.classList.remove('animate-shake'), 420);
+        fb.innerHTML = `<span class="text-[#BE123C]">Gợi ý: ${item.aTemplate.join(' → ')}</span>`;
       }
     }
-
-    function nextSentenceChallenge() {
-      if (currentSentenceIdx < sentenceQueue.length - 1) {
-        currentSentenceIdx++;
-        loadSentenceChallenge();
-      } else {
-        initSentenceGame();
-      }
-    }
-
-    function speakCurrentDialogue() {
-      const targetPet = sentenceQueue[currentSentenceIdx];
-      if (!targetPet) return;
-      speakWord(`What animal is it? It's a ${targetPet.word}.`, false);
-    }
-
-    function speakSentencePreview() {
-      if (sentenceChosenTiles.length > 0) {
-        speakWord(sentenceChosenTiles.map(t => t.text).join(' '), false);
-      } else {
-        const targetPet = sentenceQueue[currentSentenceIdx];
-        if (targetPet) speakWord(`It's a ${targetPet.word}.`, false);
-      }
-    }
-
-    function speakCurrentTargetPet() {
-      const targetPet = sentenceQueue[currentSentenceIdx];
-      if (targetPet) speakWord(targetPet.word, false);
-    }
+    function nextSentenceChallenge() { if (currentSentenceIdx < sentenceQueue.length - 1) { currentSentenceIdx++; loadSentenceChallenge(); } else initSentenceGame(); }
+    function speakCurrentDialogue() { const it = sentenceQueue[currentSentenceIdx]; if (it) speakWord(it.qEn); }
+    function speakSentencePreview() { const it = sentenceQueue[currentSentenceIdx]; if (it) speakWord(it.aTemplate.join(' ')); }
+    function speakCurrentTargetPet() { const it = sentenceQueue[currentSentenceIdx]; if (it) speakWord(it.word); }
 
     // =========================================================================
-    // 9. ĐIỀU HƯỚNG TAB & TIỆN ÍCH KHÁC
+    // 9. TRÒ CHƠI 1: LẬT THẺ TRÍ NHỚ (MEMORY FLIP CARD)
     // =========================================================================
-    function switchTab(tab) {
-      stopRecognitionIfRunning();
-      currentTab = tab;
-      const tabs = ['grid', 'pronounce', 'quiz', 'match', 'sentence'];
-      tabs.forEach(t => {
-        const btn = document.getElementById(`tab-${t}`);
-        const view = document.getElementById(`view-${t}`);
-        if (t === tab) {
-          btn.className = 'btn-lego tab-btn min-h-[64px] py-2 px-1 rounded-2xl font-display font-bold text-sm sm:text-[18px] flex flex-col items-center justify-center gap-1 bg-[#FF6B35] text-white border-2 border-[#EA580C] shadow-[0_5px_0_#C2410C]';
-          view.classList.remove('hidden');
-          if (t !== 'grid') view.classList.add('flex');
+    let memCards = [], memFlipped = [], memMatchedCount = 0, memMoves = 0, memLocked = false;
+    function initMemoryGame() {
+      const pairCount = currentAgeMode === 'preschool' ? 4 : 6;
+      const chosen = getActiveItems().slice(0, pairCount);
+      memCards = [...chosen, ...chosen].sort(() => Math.random() - 0.5).map((item, idx) => ({ uid: idx, item, flipped: false, matched: false }));
+      memFlipped = []; memMatchedCount = 0; memMoves = 0; memLocked = false;
+      renderMemoryGrid();
+    }
+    function renderMemoryGrid() {
+      const grid = document.getElementById('memory-grid');
+      grid.innerHTML = '';
+      const totalPairs = memCards.length / 2;
+      document.getElementById('memory-stats').textContent = `Đã tìm: ${memMatchedCount}/${totalPairs} cặp • Số lượt: ${memMoves}`;
+      memCards.forEach((c, idx) => {
+        const btn = document.createElement('button');
+        btn.className = c.matched
+          ? 'btn-lego min-h-[115px] bg-[#DCFCE7] border-4 border-[#22C55E] rounded-3xl p-2 flex flex-col items-center justify-center'
+          : c.flipped
+            ? 'btn-lego min-h-[115px] bg-white border-4 border-[#FACC15] rounded-3xl p-2 flex flex-col items-center justify-center shadow-[0_6px_0_#EAB308]'
+            : 'btn-lego min-h-[115px] bg-[#0EA5E9] hover:bg-[#0284C7] border-4 border-[#0284C7] rounded-3xl p-2 flex items-center justify-center shadow-[0_6px_0_#0369A1] text-white font-display text-4xl';
+        btn.innerHTML = (c.flipped || c.matched)
+          ? `<div class="w-16 h-16 pointer-events-none">${c.item.svg}</div><span class="font-display text-base font-bold text-[#FF6B35] mt-1">${c.item.word}</span>`
+          : `<span>?</span>`;
+        btn.onclick = () => flipMemoryCard(idx);
+        grid.appendChild(btn);
+      });
+    }
+    function flipMemoryCard(idx) {
+      if (memLocked) return;
+      const card = memCards[idx];
+      if (card.flipped || card.matched) return;
+      playPopSound();
+      card.flipped = true;
+      speakWord(card.item.word);
+      memFlipped.push(idx);
+      renderMemoryGrid();
+      if (memFlipped.length === 2) {
+        memMoves++;
+        memLocked = true;
+        const [i1, i2] = memFlipped;
+        if (memCards[i1].item.id === memCards[i2].item.id) {
+          memCards[i1].matched = true; memCards[i2].matched = true;
+          memMatchedCount++;
+          memFlipped = []; memLocked = false;
+          playSoundEffect('correct');
+          renderMemoryGrid();
+          if (memMatchedCount === memCards.length / 2) {
+            playApplause(); launchConfetti(); speakPraise();
+          }
         } else {
-          btn.className = 'btn-lego tab-btn min-h-[64px] py-2 px-1 rounded-2xl font-display font-bold text-sm sm:text-[18px] flex flex-col items-center justify-center gap-1 bg-white text-[#0369A1] border-2 border-[#BAE6FD] shadow-[0_5px_0_#7DD3FC]';
-          view.classList.add('hidden');
-          view.classList.remove('flex');
+          setTimeout(() => {
+            memCards[i1].flipped = false; memCards[i2].flipped = false;
+            memFlipped = []; memLocked = false;
+            renderMemoryGrid();
+          }, 850);
         }
+      }
+    }
+
+    // =========================================================================
+    // 10. TRÒ CHƠI 2: CHẠM BONG BÓNG BAY (BUBBLE POP)
+    // =========================================================================
+    let bubbleTarget = null, bubbleScore = 0;
+    function initBubbleGame() {
+      const items = [...getActiveItems()].sort(() => Math.random() - 0.5);
+      bubbleTarget = items[0];
+      document.getElementById('bubble-target-label').textContent = `Tìm: ${bubbleTarget.word}`;
+      document.getElementById('bubble-score').textContent = `Điểm bong bóng: ${bubbleScore}`;
+      const arena = document.getElementById('bubble-arena');
+      arena.innerHTML = '';
+      const pool = items.slice(0, 5).sort(() => Math.random() - 0.5);
+      pool.forEach((it, idx) => {
+        const b = document.createElement('button');
+        b.style.animationDelay = `${idx * 0.28}s`;
+        b.className = 'bubble-bob btn-lego w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-white/95 border-4 border-[#38BDF8] shadow-[0_8px_0_#0284C7] flex flex-col items-center justify-center p-2 cursor-pointer hover:scale-105';
+        b.innerHTML = `<div class="w-16 h-16 pointer-events-none">${it.svg}</div><span class="font-display text-sm font-bold text-[#0369A1]">${it.meaning}</span>`;
+        b.onclick = (e) => {
+          if (it.id === bubbleTarget.id) {
+            playPopSound(); playSoundEffect('correct');
+            bubbleScore += 10;
+            spawnKidParticles(e.clientX, e.clientY);
+            launchConfetti();
+            initBubbleGame();
+          } else {
+            playSoundEffect('wrong');
+            b.classList.add('animate-shake');
+            setTimeout(() => b.classList.remove('animate-shake'), 350);
+          }
+        };
+        arena.appendChild(b);
+      });
+      setTimeout(speakBubbleTarget, 250);
+    }
+    function speakBubbleTarget() { if (bubbleTarget) speakWord(`Touch the ${bubbleTarget.word}!`); }
+
+    // =========================================================================
+    // 11. TRÒ CHƠI 3: CHO THÚ CƯNG ĂN (FEED THE PET)
+    // =========================================================================
+    const PET_MEALS = [
+      { petId: 'cat', foodId: 'fish', foodName: 'Cá (fish)', foodSvg: `<svg viewBox="0 0 100 100" class="w-16 h-16"><ellipse cx="50" cy="50" rx="30" ry="18" fill="#F97316" stroke="#7C2D12" stroke-width="3"/><polygon points="75,50 94,35 94,65" fill="#FB923C" stroke="#7C2D12" stroke-width="3"/></svg>` },
+      { petId: 'dog', foodId: 'bone', foodName: 'Xương (bone)', foodSvg: FOOD_SVGS.bone },
+      { petId: 'rabbit', foodId: 'carrot', foodName: 'Cà rốt (carrot)', foodSvg: FOOD_SVGS.carrot },
+      { petId: 'hamster', foodId: 'banana', foodName: 'Chuối (banana)', foodSvg: FOOD_SVGS.banana },
+      { petId: 'bird', foodId: 'apple', foodName: 'Táo (apple)', foodSvg: FOOD_SVGS.apple },
+      { petId: 'fish', foodId: 'cake', foodName: 'Bánh (cake)', foodSvg: FOOD_SVGS.cake }
+    ];
+    let feedScore = 0, currentMeal = null;
+    function initFeedGame() {
+      currentMeal = PET_MEALS[Math.floor(Math.random() * PET_MEALS.length)];
+      const petObj = TOPICS_DATA[0].items.find(p => p.id === currentMeal.petId);
+      document.getElementById('feed-pet-svg').innerHTML = petObj.svg;
+      document.getElementById('feed-pet-speech').textContent = `Bạn ${petObj.meaning} muốn ăn: ${currentMeal.foodName}!`;
+      document.getElementById('feed-feedback').innerHTML = '';
+      playAnimalSound(petObj.id);
+
+      const container = document.getElementById('feed-food-options');
+      container.innerHTML = '';
+      const choices = [currentMeal, ...PET_MEALS.filter(m => m.foodId !== currentMeal.foodId).sort(() => Math.random() - 0.5).slice(0, 3)].sort(() => Math.random() - 0.5);
+      choices.forEach(ch => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-lego min-h-[100px] bg-[#FFFBEB] hover:bg-[#FEF08A] border-2 border-[#FACC15] shadow-[0_5px_0_#CA8A04] rounded-2xl p-3 flex flex-col items-center justify-center';
+        btn.innerHTML = `<div class="w-16 h-16 pointer-events-none">${ch.foodSvg}</div><span class="font-display text-base font-bold text-[#854D0E] mt-1">${ch.foodName}</span>`;
+        btn.onclick = () => {
+          if (ch.foodId === currentMeal.foodId) {
+            feedScore++;
+            document.getElementById('feed-score').textContent = `Đã cho ăn: ${feedScore} bạn nhỏ`;
+            document.getElementById('feed-feedback').innerHTML = `<span class="text-[#15803D]">Ngon quá! Cảm ơn bé nhé! ❤️</span>`;
+            const pSvg = document.getElementById('feed-pet-svg');
+            pSvg.classList.remove('animate-pop-bounce'); void pSvg.offsetWidth; pSvg.classList.add('animate-pop-bounce');
+            playApplause(); launchConfetti(); speakWord('Yummy! Thank you!');
+            setTimeout(initFeedGame, 1600);
+          } else {
+            playSoundEffect('wrong');
+            document.getElementById('feed-feedback').innerHTML = `<span class="text-[#BE123C]">Ôi không phải món này rồi, thử lại nhé!</span>`;
+          }
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    // =========================================================================
+    // 12. TRÒ CHƠI 4: XẾP KHỐI ĐÁNH VẦN (LEGO SPELLING)
+    // =========================================================================
+    let spellIdx = 0, spellLetters = [], spellChosen = [], spellSolved = false;
+    function initSpellingGame() { spellIdx = 0; loadSpellingWord(); }
+    function loadSpellingWord() {
+      spellSolved = false; spellChosen = [];
+      const items = getActiveItems();
+      if (spellIdx >= items.length) spellIdx = 0;
+      const item = items[spellIdx];
+      document.getElementById('spelling-progress').textContent = `Từ ${spellIdx + 1}/${items.length}`;
+      document.getElementById('spelling-svg').innerHTML = item.svg;
+      document.getElementById('spelling-meaning').textContent = item.meaning;
+      document.getElementById('spelling-feedback').innerHTML = '';
+      document.getElementById('btn-next-spelling').classList.add('hidden');
+
+      const chars = item.word.toUpperCase().split('');
+      spellLetters = chars.map((ch, i) => ({ uid: `sp-${i}-${ch}`, ch, used: false })).sort(() => Math.random() - 0.5);
+      renderSpellingWorkspace();
+      setTimeout(speakSpellingTarget, 250);
+    }
+    function renderSpellingWorkspace() {
+      const item = getActiveItems()[spellIdx];
+      const slots = document.getElementById('spelling-slots'), bank = document.getElementById('spelling-bank');
+      slots.innerHTML = ''; bank.innerHTML = '';
+      for (let i = 0; i < item.word.length; i++) {
+        const c = spellChosen[i], btn = document.createElement('button');
+        btn.className = c
+          ? `btn-lego w-14 h-16 rounded-2xl font-display text-3xl font-bold border-2 ${spellSolved ? 'bg-[#DCFCE7] border-[#22C55E] text-[#14532D]' : 'bg-[#FEF08A] border-[#FACC15] text-[#451A03] shadow-[0_5px_0_#CA8A04]'}`
+          : 'w-14 h-16 rounded-2xl border-2 border-dashed border-[#7DD3FC] bg-[#F0F9FF] font-display text-2xl font-bold text-[#0284C7]';
+        btn.textContent = c ? c.ch : '_';
+        if (c && !spellSolved) btn.onclick = () => { spellChosen.splice(i, 1); const b = spellLetters.find(x => x.uid === c.uid); if (b) b.used = false; renderSpellingWorkspace(); };
+        slots.appendChild(btn);
+      }
+      spellLetters.forEach(l => {
+        const btn = document.createElement('button');
+        btn.disabled = l.used || spellSolved;
+        btn.className = l.used
+          ? 'w-14 h-16 rounded-2xl bg-[#F1F5F9] border-2 border-[#E2E8F0] text-[#94A3B8] font-display text-3xl font-bold'
+          : 'btn-lego w-14 h-16 rounded-2xl bg-[#FF6B35] border-2 border-[#EA580C] shadow-[0_5px_0_#C2410C] text-white font-display text-3xl font-bold';
+        btn.textContent = l.ch;
+        btn.onclick = () => {
+          playPopSound(); l.used = true; spellChosen.push(l); renderSpellingWorkspace();
+          if (spellChosen.length === item.word.length) {
+            const built = spellChosen.map(x => x.ch).join('').toLowerCase();
+            if (built === item.word.toLowerCase()) {
+              spellSolved = true; renderSpellingWorkspace();
+              document.getElementById('spelling-feedback').innerHTML = `<span class="text-[#15803D]">Chính xác! "${item.word.toUpperCase()}"</span>`;
+              document.getElementById('btn-next-spelling').classList.remove('hidden');
+              playApplause(); launchConfetti(); speakWord(item.word);
+            } else {
+              playSoundEffect('wrong');
+              document.getElementById('spelling-feedback').innerHTML = `<span class="text-[#BE123C]">Chưa đúng rồi, bé xếp lại nhé!</span>`;
+            }
+          }
+        };
+        bank.appendChild(btn);
+      });
+    }
+    function clearSpellingSlots() { spellChosen = []; spellLetters.forEach(l => l.used = false); document.getElementById('spelling-feedback').innerHTML = ''; renderSpellingWorkspace(); }
+    function nextSpellingWord() { spellIdx = (spellIdx + 1) % getActiveItems().length; loadSpellingWord(); }
+    function speakSpellingTarget() { speakWord(getActiveItems()[spellIdx].word); }
+
+    // =========================================================================
+    // 13. NHÀ THÚ CƯNG & HUY HIỆU (MY PET HOUSE)
+    // =========================================================================
+    function renderPetHouse() {
+      const pets = TOPICS_DATA[0].items;
+      const unlockedCount = pets.filter(p => learnedIds.has(p.id)).length;
+      document.getElementById('pethouse-badge-count').textContent = `${unlockedCount}/${pets.length} Bạn nhỏ`;
+
+      const garden = document.getElementById('pethouse-garden');
+      garden.innerHTML = '';
+      pets.forEach(p => {
+        const unlocked = learnedIds.has(p.id);
+        const card = document.createElement('div');
+        card.className = unlocked
+          ? 'btn-lego bg-white border-4 border-[#22C55E] shadow-[0_6px_0_#16A34A] rounded-3xl p-4 flex flex-col items-center text-center cursor-pointer'
+          : 'bg-[#F1F5F9] border-2 border-dashed border-[#94A3B8] rounded-3xl p-4 flex flex-col items-center text-center opacity-70';
+        card.innerHTML = unlocked
+          ? `<div class="w-28 h-28">${p.svg}</div><span class="font-display text-xl font-bold text-[#14532D] mt-2">${p.meaning} (${p.word})</span><span class="text-sm font-bold text-[#0284C7]">Chạm để chơi cùng!</span>`
+          : `<div class="w-28 h-28 grayscale opacity-30">${p.svg}</div><span class="font-display text-lg font-bold text-[#64748B] mt-2">Chưa mở khóa</span><span class="text-sm font-bold text-[#64748B]">Học từ "${p.word}" nhé!</span>`;
+        if (unlocked) {
+          card.onclick = (e) => {
+            playAnimalSound(p.id);
+            spawnKidParticles(e.clientX, e.clientY);
+            setTimeout(() => speakWord(`Hello! I am a ${p.word}!`), 350);
+          };
+        }
+        garden.appendChild(card);
       });
 
-      if (tab === 'pronounce') {
-        renderPronounceView();
-      } else if (tab === 'quiz') {
-        generateQuizQuestion();
-      } else if (tab === 'match') {
-        if (matchedPairs.length === 0 || matchLeftOrder.length === 0) {
-          initMatchGame();
-        } else {
-          requestAnimationFrame(drawAllMatchedLines);
-        }
-      } else if (tab === 'sentence') {
-        if (sentenceQueue.length === 0) {
-          initSentenceGame();
-        }
-      }
+      const trophies = document.getElementById('pethouse-trophies');
+      trophies.innerHTML = '';
+      TOPICS_DATA.forEach(t => {
+        const learnedInTopic = t.items.filter(i => learnedIds.has(i.id)).length;
+        const done = learnedInTopic === t.items.length;
+        const box = document.createElement('div');
+        box.className = done
+          ? 'bg-[#FEF08A] border-2 border-[#FACC15] rounded-2xl p-3 text-center shadow-[0_4px_0_#CA8A04]'
+          : 'bg-[#F8FAFC] border-2 border-[#E2E8F0] rounded-2xl p-3 text-center';
+        box.innerHTML = `<div class="text-3xl mb-1">${done ? '🏆' : t.icon}</div><div class="font-display text-base font-bold text-[#1E1B4B]">${t.titleVi}</div><div class="text-sm font-bold text-[#0369A1]">${learnedInTopic}/${t.items.length}</div>`;
+        trophies.appendChild(box);
+      });
     }
 
+    // =========================================================================
+    // 14. TIỆN ÍCH CHUNG & KHỞI TẠO
+    // =========================================================================
     function launchConfetti() {
-      if (typeof confetti === 'function') {
-        confetti({
-          particleCount: 55,
-          spread: 65,
-          origin: { y: 0.65 },
-          colors: ['#f97316', '#ef4444', '#eab308', '#22c55e', '#0ea5e9']
-        });
-      }
+      if (typeof confetti === 'function') confetti({ particleCount: 55, spread: 65, origin: { y: 0.65 } });
     }
-
-    let toastTimeout = null;
+    let toastTimer = null;
     function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.classList.remove('opacity-0');
-      toast.classList.add('opacity-100');
-      clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        toast.classList.remove('opacity-100');
-        toast.classList.add('opacity-0');
-      }, 2200);
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.remove('opacity-0'); t.classList.add('opacity-100');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.classList.remove('opacity-100'); t.classList.add('opacity-0'); }, 2200);
     }
-
     function resetProgress() {
-      learnedIds.clear();
-      pronounceStars = {};
+      learnedIds.clear(); pronounceStars = {};
       localStorage.removeItem('topo_pets_pronounce_stars');
-      applyViewMode(currentViewMode);
-      updateProgressUI();
-      renderGrid();
-      if (currentTab === 'pronounce') renderPronounceView();
-      showToast('Đã đặt lại tiến độ học tập!');
+      updateProgressUI(); renderGrid();
+      showToast('Đã đặt lại tiến độ!');
     }
 
-    // Khởi tạo ứng dụng khi tải trang xong
+    window.addEventListener('resize', () => { if (currentTab === 'match') drawAllMatchedLines(); });
     window.addEventListener('DOMContentLoaded', () => {
-      // Nạp trước danh sách giọng đọc
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.getVoices();
-      }
+      if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
       applyViewMode(currentViewMode);
+      setAgeMode(currentAgeMode);
+      renderTopicSelector();
+      switchArea('learn');
       updateProgressUI();
       renderGrid();
     });
-  
-  
-  
+
   </script>
 </body>
 </html>
