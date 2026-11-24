@@ -10,46 +10,119 @@
       theme: {
         extend: {
           fontFamily: {
-            display: ['"Cherry Bomb One"', 'Fredoka', 'Nunito', 'cursive', 'sans-serif'],
-            cherry: ['"Cherry Bomb One"', 'cursive', 'sans-serif']
+            display: ['Fredoka', 'Nunito', 'sans-serif'],
+            body: ['Nunito', 'sans-serif']
           }
         }
       }
     };
   </script>
-  <!-- Google Fonts: Cherry Bomb One (mới cài đặt), Fredoka & Nunito -->
+  <!-- Google Fonts: Fredoka & Nunito (Tròn trịa, hiện đại, thân thiện với trẻ em) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
   <!-- Tone.js cho âm thanh vui nhộn khi trả lời đúng/sai -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
   <!-- Canvas Confetti cho hiệu ứng pháo giấy chúc mừng -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
   <style>
-    /* Nạp font Cherry Bomb One cục bộ của dự án và từ font máy tính vừa cài đặt */
-    @font-face {
-      font-family: 'Cherry Bomb One';
-      src: local('Cherry Bomb One'),
-           local('CherryBombOne-Regular'),
-           url('./fonts/CherryBombOne-Regular.ttf') format('truetype');
-      font-weight: 400;
-      font-style: normal;
-      font-display: swap;
-    }
-
     body {
-      font-family: 'Nunito', 'Cherry Bomb One', sans-serif;
+      font-family: 'Nunito', sans-serif;
       background: linear-gradient(135deg, #fff5eb 0%, #e0f2fe 50%, #fef3c7 100%);
       min-height: 100vh;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
 
-    .font-display,
-    .font-cherry {
-      font-family: 'Cherry Bomb One', 'Fredoka', 'Nunito', cursive, sans-serif;
-      letter-spacing: 0.03em;
+    .font-display {
+      font-family: 'Fredoka', 'Nunito', sans-serif;
+      letter-spacing: 0.015em;
+    }
+
+    /* =========================================================================
+       ĐỊNH NGHĨA 2 CHẾ ĐỘ HIỂN THỊ: 1. WEB (MÀN HÌNH RỘNG) & 2. MOBILE (ĐIỆN THOẠI)
+       ========================================================================= */
+    #app-shell[data-mode="web"] {
+      max-width: 68rem; /* 1088px */
+      border-radius: 2rem;
+      border-width: 4px;
+      border-color: #e2e8f0;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    }
+
+    #app-shell[data-mode="web"] #pets-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 1.5rem !important;
+    }
+
+    #app-shell[data-mode="web"] .pet-card {
+      padding: 1.25rem !important;
+    }
+
+    #app-shell[data-mode="web"] .pet-card svg {
+      width: 7.5rem;
+      height: 7.5rem;
+    }
+
+    #app-shell[data-mode="web"] #pr-card-body {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-around;
+      gap: 2.5rem;
+    }
+
+    #app-shell[data-mode="web"] #pr-left-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      min-width: 220px;
+    }
+
+    #app-shell[data-mode="web"] #pr-right-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+    }
+
+    #app-shell[data-mode="web"] #quiz-options {
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      gap: 1.25rem !important;
+    }
+
+    #app-shell[data-mode="web"] #match-board {
+      max-width: 44rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #app-shell[data-mode="web"] #sentence-workspace {
+      max-width: 48rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #app-shell[data-mode="mobile"] {
+      max-width: 440px;
+      min-height: 800px;
+      border-radius: 2.5rem;
+      border-width: 8px;
+      border-color: rgba(15, 23, 42, 0.15);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    #app-shell[data-mode="mobile"] #pets-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 0.875rem !important;
+    }
+
+    #app-shell[data-mode="mobile"] #quiz-options {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 0.625rem !important;
     }
 
     /* Hiệu ứng nút bấm 3D nổi bật */
@@ -204,10 +277,27 @@
 
   </style>
 </head>
-<body class="flex items-center justify-center p-0 sm:p-4 md:p-6">
+<body class="flex flex-col items-center justify-start min-h-screen pt-14 pb-6 px-2 sm:px-4">
 
-  <!-- Khung App Mobile-First Responsive -->
-  <div id="app-shell" class="w-full max-w-[460px] min-h-screen sm:min-h-[820px] sm:max-h-[880px] bg-white sm:rounded-[38px] sm:border-[6px] sm:border-slate-900/10 shadow-2xl flex flex-col overflow-hidden relative">
+  <!-- ==================== BỘ CHUYỂN ĐỔI 2 CHẾ ĐỘ (1: WEB | 2: MOBILE) ==================== -->
+  <aside class="fixed top-2.5 z-50 flex items-center gap-1.5 bg-white/95 backdrop-blur-md px-2 py-1.5 rounded-full shadow-lg border-2 border-slate-200/90" aria-label="Bộ chọn chế độ hiển thị">
+    <button id="mode-btn-web" onclick="switchViewMode('web')"
+      class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-display text-xs sm:text-sm font-bold bg-sky-600 text-white shadow-md transition-all">
+      <span class="text-base">💻</span>
+      <span>Chế độ Web</span>
+    </button>
+    <button id="mode-btn-mobile" onclick="switchViewMode('mobile')"
+      class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-display text-xs sm:text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all">
+      <span class="text-base">📱</span>
+      <span>Chế độ Mobile</span>
+    </button>
+  </aside>
+
+  <!-- Khung App thích ứng 2 chế độ (Web rộng rãi / Mobile gọn gàng) -->
+  <div id="app-shell" data-mode="web" class="w-full max-w-5xl bg-white sm:rounded-[32px] sm:border-4 sm:border-slate-200/90 shadow-2xl flex flex-col overflow-hidden relative transition-all duration-300">
+    
+    <!-- Dynamic Island / Loa giả lập điện thoại (Chỉ hiện khi ở Chế độ Mobile) -->
+    <div id="phone-notch" class="hidden absolute top-2 left-1/2 -translate-x-1/2 w-28 h-4 bg-slate-900 rounded-full z-30 pointer-events-none"></div>
 
     <!-- Thanh trang trí trên cùng -->
     <div class="h-2 w-full bg-gradient-to-r from-orange-500 via-red-500 to-sky-500"></div>
@@ -332,10 +422,10 @@
           </div>
         </div>
 
-        <!-- Thẻ luyện phát âm chính -->
-        <div class="bg-white rounded-[30px] border-4 border-[#FFD166] shadow-lg p-4 sm:p-5 flex flex-col items-center text-center relative overflow-hidden">
+        <!-- Thẻ luyện phát âm chính (Tự thích ứng Web 2 cột rộng rãi / Mobile 1 cột gọn gàng) -->
+        <div id="pr-main-card" class="bg-white rounded-[30px] border-4 border-[#FFD166] shadow-lg p-4 sm:p-6 relative overflow-hidden">
           <!-- Điều hướng Trước / Sau -->
-          <div class="w-full flex items-center justify-between mb-1">
+          <div class="w-full flex items-center justify-between mb-2">
             <button onclick="prevPronounceWord()" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold flex items-center justify-center active:scale-90 transition" title="Từ trước">
               ◀
             </button>
@@ -347,45 +437,51 @@
             </button>
           </div>
 
-          <!-- Hình minh họa nhân vật -->
-          <div id="pr-illustration" onclick="onPronounceIllustrationClick()" class="w-32 h-32 sm:w-36 sm:h-36 flex items-center justify-center cursor-pointer">
-            <!-- SVG động vật -->
-          </div>
+          <!-- Thân thẻ phát âm thích ứng (data-mode="web" -> 2 cột, data-mode="mobile" -> 1 cột) -->
+          <div id="pr-card-body" class="w-full flex flex-col items-center text-center">
+            <!-- Cột Trái: Con vật & Tiếng kêu -->
+            <div id="pr-left-col" class="flex flex-col items-center">
+              <div id="pr-illustration" onclick="onPronounceIllustrationClick()" class="w-36 h-36 sm:w-44 sm:h-44 flex items-center justify-center cursor-pointer transition-transform hover:scale-105" title="Chạm để nghe tiếng kêu & phát âm">
+                <!-- SVG động vật -->
+              </div>
+              <button onclick="playCurrentPetAnimalSound()" class="btn-3d mt-2 py-2 px-3.5 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-extrabold flex items-center gap-1.5 text-xs shadow-sm">
+                <span>🐾</span>
+                <span id="pr-animal-sound-btn">Tiếng kêu</span>
+              </button>
+            </div>
 
-          <!-- Từ tiếng Anh + Phiên âm + Nghĩa -->
-          <div class="flex items-baseline justify-center gap-2 mt-1">
-            <h2 id="pr-word" class="font-display font-bold text-3xl sm:text-4xl text-[#E84C3D] tracking-wide">cat</h2>
-            <span id="pr-ipa" class="text-base font-bold text-slate-400">/kæt/</span>
-          </div>
-          <div class="mt-1 bg-amber-100/80 text-amber-900 px-4 py-0.5 rounded-full font-extrabold text-sm">
-            <span id="pr-meaning">mèo</span>
-          </div>
+            <!-- Cột Phải: Từ vựng, Nút nghe & Micro -->
+            <div id="pr-right-col" class="w-full flex flex-col items-center mt-3 sm:mt-0">
+              <!-- Từ tiếng Anh + Phiên âm + Nghĩa -->
+              <div class="flex items-baseline justify-center gap-2 mt-1">
+                <h2 id="pr-word" class="font-display font-bold text-3xl sm:text-4xl text-[#E84C3D] tracking-wide">cat</h2>
+                <span id="pr-ipa" class="text-base font-bold text-slate-400">/kæt/</span>
+              </div>
+              <div class="mt-1 bg-amber-100/80 text-amber-900 px-4 py-0.5 rounded-full font-extrabold text-sm">
+                <span id="pr-meaning">mèo</span>
+              </div>
 
-          <!-- Câu ví dụ ngắn cho bé luyện thêm -->
-          <div onclick="speakSampleSentence()" class="mt-2.5 bg-sky-50 hover:bg-sky-100 border border-sky-200/80 rounded-xl px-3 py-1.5 text-xs font-bold text-sky-900 cursor-pointer flex items-center gap-1.5 transition">
-            <span>💬</span>
-            <span id="pr-sentence">It is a cute cat.</span>
-            <span class="text-sky-500 text-[11px]">🔊</span>
-          </div>
+              <!-- Câu ví dụ ngắn cho bé luyện thêm -->
+              <div onclick="speakSampleSentence()" class="mt-2.5 bg-sky-50 hover:bg-sky-100 border border-sky-200/80 rounded-xl px-3.5 py-1.5 text-xs font-bold text-sky-900 cursor-pointer flex items-center gap-1.5 transition">
+                <span>💬</span>
+                <span id="pr-sentence">It is a cute cat.</span>
+                <span class="text-sky-500 text-[11px]">🔊</span>
+              </div>
 
-          <!-- Ba nút tương tác giác quan: Tiếng kêu con vật - Nghe đọc mẫu - Đọc chậm -->
-          <div class="flex flex-wrap items-center gap-2 mt-3.5 w-full justify-center">
-            <button onclick="playCurrentPetAnimalSound()" class="btn-3d py-2 px-3 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-extrabold flex items-center gap-1.5 text-xs shadow-sm">
-              <span>🐾</span>
-              <span id="pr-animal-sound-btn">Tiếng kêu</span>
-            </button>
-            <button onclick="speakPronounceTarget(false)" class="btn-3d flex-1 py-2 px-3 bg-gradient-to-b from-sky-400 to-sky-600 text-white font-extrabold rounded-2xl flex items-center justify-center gap-1 text-xs shadow-sm">
-              <span>🔊</span>
-              <span>Nghe mẫu</span>
-            </button>
-            <button onclick="speakPronounceTarget(true)" class="btn-3d flex-1 py-2 px-3 bg-gradient-to-b from-[#06D6A0] to-emerald-600 text-white font-extrabold rounded-2xl flex items-center justify-center gap-1 text-xs shadow-sm">
-              <span>🐢</span>
-              <span>Đọc chậm</span>
-            </button>
-          </div>
+              <!-- Hai nút nghe mẫu: Nghe chuẩn & Đọc chậm -->
+              <div class="flex items-center gap-2 mt-3.5 w-full max-w-[280px] justify-center">
+                <button onclick="speakPronounceTarget(false)" class="btn-3d flex-1 py-2.5 px-3 bg-gradient-to-b from-sky-400 to-sky-600 text-white font-extrabold rounded-2xl flex items-center justify-center gap-1 text-xs sm:text-sm shadow-sm">
+                  <span>🔊</span>
+                  <span>Nghe mẫu</span>
+                </button>
+                <button onclick="speakPronounceTarget(true)" class="btn-3d flex-1 py-2.5 px-3 bg-gradient-to-b from-[#06D6A0] to-emerald-600 text-white font-extrabold rounded-2xl flex items-center justify-center gap-1 text-xs sm:text-sm shadow-sm">
+                  <span>🐢</span>
+                  <span>Đọc chậm</span>
+                </button>
+              </div>
 
-          <!-- Khu vực Micro thu âm & Chấm điểm -->
-          <div class="w-full mt-4 pt-3.5 border-t border-dashed border-slate-200 flex flex-col items-center">
+              <!-- Khu vực Micro thu âm & Chấm điểm -->
+              <div class="w-full mt-3.5 pt-3 border-t border-dashed border-slate-200 flex flex-col items-center">
             <button id="btn-mic" onclick="startPronunciationCheck()" class="btn-3d w-full max-w-[260px] py-3 px-4 rounded-2xl bg-gradient-to-r from-[#E84C3D] to-rose-500 text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-md">
               <span id="mic-icon" class="text-xl">🎤</span>
               <span id="mic-btn-text">Bấm để nói</span>
@@ -412,6 +508,8 @@
             </button>
           </div>
         </div>
+      </div>
+    </div>
 
         <!-- Banner hoàn thành Tập phát âm & Dẫn sang Bài tập 2: Nối từ -->
         <div id="pronounce-cta-card" class="bg-gradient-to-r from-[#1A2B4C] to-slate-800 text-white rounded-2xl p-3.5 shadow-md flex flex-col gap-2.5">
@@ -1011,6 +1109,48 @@
     // =========================================================================
     // 2. QUẢN LÝ TRẠNG THÁI ỨNG DỤNG (STATE)
     // =========================================================================
+    
+    // =========================================================================
+    // QUẢN LÝ 2 CHẾ ĐỘ HIỂN THỊ: 1. BẢN WEB (MÀN HÌNH RỘNG) & 2. BẢN MOBILE
+    // =========================================================================
+    let currentViewMode = localStorage.getItem('topo_view_mode') || (window.innerWidth >= 900 ? 'web' : 'mobile');
+
+    function applyViewMode(mode) {
+      currentViewMode = mode;
+      localStorage.setItem('topo_view_mode', mode);
+
+      const shell = document.getElementById('app-shell');
+      const btnWeb = document.getElementById('mode-btn-web');
+      const btnMobile = document.getElementById('mode-btn-mobile');
+      const phoneNotch = document.getElementById('phone-notch');
+
+      if (!shell || !btnWeb || !btnMobile) return;
+
+      if (mode === 'web') {
+        shell.dataset.mode = 'web';
+        if (phoneNotch) phoneNotch.classList.add('hidden');
+
+        btnWeb.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-display text-xs sm:text-sm font-bold bg-sky-600 text-white shadow-md transition-all';
+        btnMobile.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-display text-xs sm:text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all';
+      } else {
+        shell.dataset.mode = 'mobile';
+        if (phoneNotch) phoneNotch.classList.remove('hidden');
+
+        btnMobile.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-display text-xs sm:text-sm font-bold bg-orange-500 text-white shadow-md transition-all';
+        btnWeb.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-display text-xs sm:text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all';
+      }
+
+      // Vẽ lại đường nối nếu đang ở Bước 4 (Nối từ)
+      if (currentTab === 'match') {
+        setTimeout(drawAllMatchedLines, 80);
+      }
+    }
+
+    function switchViewMode(mode) {
+      applyViewMode(mode);
+      showToast(mode === 'web' ? '💻 Đã bật Chế độ Web (Màn hình lớn)' : '📱 Đã bật Chế độ Mobile');
+    }
+
     let learnedIds = new Set(JSON.parse(localStorage.getItem('topo_pets_learned') || '["cat"]'));
     let currentTab = 'grid';
 
@@ -1155,7 +1295,7 @@
             </button>
           </div>
 
-          <!-- Tên con vật tiếng Việt thân thiện phong cách Cherry Bomb One -->
+          <!-- Tên con vật tiếng Việt thân thiện chuẩn đẹp Fredoka -->
           <div class="font-display text-sm text-amber-900 bg-amber-100/90 px-3 py-0.5 rounded-full inline-block mt-0.5 shadow-sm">
             Con ${pet.meaning}
           </div>
@@ -1165,7 +1305,7 @@
             ${pet.svg}
           </div>
 
-          <!-- Từ tiếng Anh chữ to nổi bật phong cách Cherry Bomb One -->
+          <!-- Từ tiếng Anh chữ to nổi bật chuẩn đẹp Fredoka -->
           <div class="font-display font-bold text-3xl sm:text-4xl text-red-600 leading-none tracking-wide mt-0.5 drop-shadow-sm">
             ${pet.word}
           </div>
@@ -1230,6 +1370,7 @@
           showToast('🎉 Chúc mừng! Bé đã thuộc tất cả 6 từ vựng!');
         }
       }
+      applyViewMode(currentViewMode);
       updateProgressUI();
       renderGrid();
     }
@@ -2206,6 +2347,7 @@
       learnedIds.clear();
       pronounceStars = {};
       localStorage.removeItem('topo_pets_pronounce_stars');
+      applyViewMode(currentViewMode);
       updateProgressUI();
       renderGrid();
       if (currentTab === 'pronounce') renderPronounceView();
@@ -2218,6 +2360,7 @@
       if ('speechSynthesis' in window) {
         window.speechSynthesis.getVoices();
       }
+      applyViewMode(currentViewMode);
       updateProgressUI();
       renderGrid();
     });
